@@ -27,7 +27,10 @@ const TABS = [
 
 export default function MySpace() {
   return (
-    <section id="my-space" className="mx-auto w-full max-w-[1040px] border-x-[0.5px] border-border px-2 py-10 sm:px-4">
+    <section
+      id="my-space"
+      className="screen-line-top screen-line-bottom mx-auto w-full max-w-[1040px] border-x-[0.5px] border-border px-2 py-10 sm:px-4"
+    >
       <SectionHeading>/My Space</SectionHeading>
 
       <FadeIn className="mt-10 px-2 sm:px-3">

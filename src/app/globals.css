@@ -39,6 +39,7 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-line: var(--line);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -115,6 +116,7 @@
   --sidebar-accent-foreground: #fafafa;
   --sidebar-border: #3e3e3e;
   --sidebar-ring: #565656;
+  --line: color-mix(in oklab, var(--border) 64%, var(--background));
 }
 
 @layer base {
@@ -126,5 +128,61 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+/*
+ * Hairline that spans the full viewport width regardless of its element's
+ * own container width — offsetting -100vw and sizing 200vw is what lets it
+ * reach the screen edge instead of stopping at the parent's max-width.
+ * Pattern from ncdai/chanhdai.com (MIT).
+ */
+@utility screen-line-top {
+  position: relative;
+  &:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100vw;
+    z-index: -1;
+    height: 1px;
+    width: 200vw;
+    background-color: var(--line);
+  }
+}
+
+@utility screen-line-bottom {
+  position: relative;
+  &:after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: -100vw;
+    z-index: -1;
+    height: 1px;
+    width: 200vw;
+    background-color: var(--line);
+  }
+}
+
+@utility stripe-divider {
+  position: relative;
+  height: 2rem;
+  &:before {
+    content: "";
+    position: absolute;
+    left: -100vw;
+    z-index: -1;
+    height: 100%;
+    width: 200vw;
+    --pattern-foreground: color-mix(in oklab, var(--line) 56%, transparent);
+    background-image: repeating-linear-gradient(
+      315deg,
+      var(--pattern-foreground) 0,
+      var(--pattern-foreground) 1px,
+      transparent 0,
+      transparent 50%
+    );
+    background-size: 10px 10px;
   }
 }

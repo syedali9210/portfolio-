@@ -5,7 +5,10 @@ const COLLAGE_OFFSETS = ["sm:translate-y-0", "sm:translate-y-10", "sm:-translate
 
 export default function AboutMe() {
   return (
-    <section id="about-me" className="mx-auto w-full max-w-[1040px] border-x-[0.5px] border-border px-2 py-10 sm:px-4">
+    <section
+      id="about-me"
+      className="screen-line-top screen-line-bottom mx-auto w-full max-w-[1040px] border-x-[0.5px] border-border px-2 py-10 sm:px-4"
+    >
       <SectionHeading>/About me</SectionHeading>
 
       <FadeIn className="mt-10 border-y-[0.5px] border-border px-2 py-6 sm:px-3">

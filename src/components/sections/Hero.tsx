@@ -61,7 +61,7 @@ export default function Hero() {
 
       {/* Profile bar */}
       <FadeIn>
-        <div className="mx-auto flex w-full max-w-[1040px] flex-col border-x-[0.5px] border-b-[0.5px] border-border md:flex-row md:items-start md:justify-between">
+        <div className="screen-line-bottom mx-auto flex w-full max-w-[1040px] flex-col border-x-[0.5px] border-border md:flex-row md:items-start md:justify-between">
           <div className="flex w-full flex-col">
             <div className="flex items-center gap-2 border-b-[0.5px] border-border px-4 py-3">
               <div className="relative size-[47px] shrink-0 overflow-hidden rounded-full border-[0.5px] border-border bg-[#161618] shadow-[inset_0_0_10px_0_#232323]">
@@ -128,7 +128,7 @@ export default function Hero() {
       <SectionDivider />
 
       {/* Dock + Yapping */}
-      <div className="mx-auto w-full max-w-[1040px] border-[0.5px] border-border">
+      <div className="screen-line-top screen-line-bottom mx-auto w-full max-w-[1040px] border-x-[0.5px] border-border">
         <div className="grid grid-cols-1 gap-6 px-4 py-10 sm:px-8 md:grid-cols-3">
           <FadeIn delay={0.05} className="flex flex-col gap-3">
             <DockIconRow icons={DOCK_COLUMN_A.icons} />
