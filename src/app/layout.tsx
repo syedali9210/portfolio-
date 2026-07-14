@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Geist_Mono } from "next/font/google";
+import { Agentation } from "agentation";
 import SmoothScroll from "@/components/SmoothScroll";
 import "./globals.css";
 
@@ -31,6 +32,9 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <SmoothScroll>{children}</SmoothScroll>
+        {process.env.NODE_ENV === "development" && (
+          <Agentation endpoint="http://localhost:4747" />
+        )}
       </body>
     </html>
   );
