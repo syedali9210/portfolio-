@@ -29,11 +29,11 @@ export default function MySpace() {
   return (
     <section
       id="my-space"
-      className="screen-line-top screen-line-bottom mx-auto w-full max-w-[1040px] border-x-[0.5px] border-border px-2 py-10 sm:px-4"
+      className="screen-line-top screen-line-bottom mx-auto w-full max-w-[1040px] border-x-[0.5px] border-border py-10"
     >
       <SectionHeading>/My Space</SectionHeading>
 
-      <FadeIn className="mt-10 px-2 sm:px-3">
+      <FadeIn className="screen-line-top screen-line-bottom mt-10 px-2 sm:px-3">
         <p className="text-lg leading-relaxed text-[#7a7a7a] sm:text-xl">
           From developing my own portfolio to making my own pet buddy like Claude, this idea came to
           my mind while i was glued to my desk while making my portfolio with my earphones on.
@@ -51,17 +51,19 @@ export default function MySpace() {
 
       <FadeIn delay={0.1} className="mt-8 px-2 sm:px-3">
         <Tabs defaultValue="about-me">
-          <TabsList className="h-auto w-fit gap-4 bg-transparent p-0">
-            {TABS.map((tab) => (
-              <TabsTrigger
-                key={tab.value}
-                value={tab.value}
-                className="rounded-xl bg-[rgba(84,84,84,0.1)] px-4 py-2 text-sm font-medium text-muted-foreground data-active:bg-[rgba(84,84,84,0.25)] data-active:text-[#fafafa]"
-              >
-                {tab.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+          <div className="screen-line-bottom pb-4">
+            <TabsList className="h-auto w-fit gap-4 bg-transparent p-0">
+              {TABS.map((tab) => (
+                <TabsTrigger
+                  key={tab.value}
+                  value={tab.value}
+                  className="rounded-xl bg-[rgba(84,84,84,0.1)] px-4 py-2 text-sm font-medium text-muted-foreground data-active:bg-[rgba(84,84,84,0.25)] data-active:text-[#fafafa]"
+                >
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
 
           {TABS.map((tab) => (
             <TabsContent key={tab.value} value={tab.value} className="mt-6">

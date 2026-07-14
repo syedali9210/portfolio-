@@ -2,6 +2,7 @@ import Image from "next/image";
 import FadeIn from "@/components/FadeIn";
 import LiveClock from "@/components/LiveClock";
 import SectionDivider from "@/components/SectionDivider";
+import YappingAccordion from "@/components/YappingAccordion";
 
 const INFO_ITEMS = [
   { icon: "/images/profile-icon-role.svg", label: "Design Engineer", href: undefined, full: true },
@@ -39,7 +40,7 @@ function DockIconRow({ icons }: { icons: string[] }) {
           key={i}
           className="relative flex size-13 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-black shadow-[inset_0_0_20px_0_rgba(48,48,48,0.25)]"
         >
-          <Image src={src} alt="" width={32} height={32} className="object-contain" />
+          <Image src={src} alt="" width={28} height={28} className="object-contain" />
         </div>
       ))}
     </div>
@@ -61,7 +62,7 @@ export default function Hero() {
 
       {/* Profile bar */}
       <FadeIn>
-        <div className="screen-line-bottom mx-auto flex w-full max-w-[1040px] flex-col border-x-[0.5px] border-border md:flex-row md:items-start md:justify-between">
+        <div className="screen-line-bottom mx-auto flex w-full max-w-[1040px] flex-col border-x-[0.5px] border-border">
           <div className="flex w-full flex-col">
             <div className="screen-line-bottom flex items-center gap-2 px-4 py-3">
               <div className="relative size-[47px] shrink-0 overflow-hidden rounded-full border-[0.5px] border-border bg-[#161618] shadow-[inset_0_0_10px_0_#232323]">
@@ -72,6 +73,20 @@ export default function Hero() {
                 <p className="bg-gradient-to-b from-[#d97757] to-[#733f2e] bg-clip-text text-xs text-transparent">
                   Design Engineer
                 </p>
+              </div>
+
+              <div className="ml-auto flex items-center gap-2">
+                <div className="flex size-6 shrink-0 items-center justify-center rounded-md border-[0.5px] border-white/10 bg-[#27272a]">
+                  <Image src="/images/dock-icon-16.png" alt="" width={14} height={14} className="rounded-sm" />
+                </div>
+                <button
+                  type="button"
+                  aria-label="Theme toggle (coming soon)"
+                  disabled
+                  className="flex size-6 shrink-0 items-center justify-center rounded-md border-[0.5px] border-white/10 bg-[#27272a] disabled:cursor-not-allowed"
+                >
+                  <Image src="/images/mode-night-icon-2.svg" alt="" width={14} height={14} />
+                </button>
               </div>
             </div>
 
@@ -107,20 +122,6 @@ export default function Hero() {
                 me to do things the unconventional way.
               </p>
             </div>
-          </div>
-
-          <div className="flex shrink-0 items-center justify-center gap-4 border-t-[0.5px] border-border p-4 md:justify-start md:border-t-0 md:border-b-[0.5px]">
-            <div className="relative flex size-12 items-center justify-center rounded-full bg-black shadow-[inset_0_0_20px_0_rgba(48,48,48,0.25)]">
-              <Image src="/images/dock-icon-16.png" alt="" width={20} height={20} className="rounded" />
-            </div>
-            <button
-              type="button"
-              aria-label="Theme toggle (coming soon)"
-              disabled
-              className="flex size-[42px] items-center justify-center rounded-full border-[0.5px] border-[#39393d] bg-[#262628] shadow-[inset_0_0_10px_0_#232323] disabled:cursor-not-allowed"
-            >
-              <Image src="/images/mode-night-icon-2.svg" alt="" width={18} height={18} />
-            </button>
           </div>
         </div>
       </FadeIn>
@@ -175,34 +176,7 @@ export default function Hero() {
         </div>
 
         {/* Yapping — runs edge-to-edge within the dock box, matching Figma (no horizontal inset) */}
-        <div className="flex flex-col">
-          <div className="screen-line-top screen-line-bottom flex items-center justify-between px-3 py-1 sm:px-4">
-            <p className="text-base text-[#7a7a7a]">*Yapping each aspect</p>
-            <span className="rotate-90 text-[#7a7a7a]">{">"}</span>
-          </div>
-
-          {[
-            {
-              n: "01",
-              text: "I never open Figma first. I start with the problem, sit with it, understand what the user is actually struggling with before a single screen exists. Design without that is just decoration.",
-            },
-            {
-              n: "02",
-              text: "once the problem is clear, I build flows and interfaces around one thing, clarity. Every screen gets stripped down until only what earns its place stays. If it does not help the user move forward, it gets cut, no matter how nice it looks.",
-            },
-          ].map((item) => (
-            <div
-              key={item.n}
-              className="screen-line-bottom flex gap-6 px-3 py-4 sm:gap-10 sm:px-4"
-            >
-              <div className="flex shrink-0 items-center gap-2">
-                <span className="text-sm text-white">[{item.n}]</span>
-                <Image src="/images/numbered-item-arrow.svg" alt="" width={21} height={12} />
-              </div>
-              <p className="text-lg text-[#7a7a7a] sm:text-xl">{item.text}</p>
-            </div>
-          ))}
-        </div>
+        <YappingAccordion />
       </div>
     </section>
   );
