@@ -1,6 +1,7 @@
 import Image from "next/image";
 import FadeIn from "@/components/FadeIn";
 import LiveClock from "@/components/LiveClock";
+import MazePetBuddy from "@/components/MazePetBuddy";
 import SectionDivider from "@/components/SectionDivider";
 import YappingAccordion from "@/components/YappingAccordion";
 
@@ -50,15 +51,7 @@ function DockIconRow({ icons }: { icons: string[] }) {
 export default function Hero() {
   return (
     <section id="home" className="relative w-full">
-      <div className="relative mx-auto hidden h-[280px] w-full max-w-[1040px] border-x-[0.5px] border-border sm:block sm:h-[340px] lg:h-[434px]">
-        <Image
-          src="/images/hero-banner-graphic.svg"
-          alt=""
-          fill
-          className="pointer-events-none select-none object-cover"
-          priority
-        />
-      </div>
+      <MazePetBuddy />
 
       {/* Profile bar */}
       <FadeIn>
