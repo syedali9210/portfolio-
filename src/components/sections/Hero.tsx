@@ -1,6 +1,7 @@
 import Image from "next/image";
 import FadeIn from "@/components/FadeIn";
 import LiveClock from "@/components/LiveClock";
+import MazePetBuddy from "@/components/MazePetBuddy";
 import SectionDivider from "@/components/SectionDivider";
 import YappingAccordion from "@/components/YappingAccordion";
 
@@ -34,13 +35,13 @@ const DOCK_COLUMN_C = {
 
 function DockIconRow({ icons }: { icons: string[] }) {
   return (
-    <div className="flex items-center gap-2 rounded-xl border-[0.5px] border-border bg-[#080808] px-3 py-3">
+    <div className="flex flex-wrap items-center gap-2 rounded-xl border-[0.5px] border-border bg-[#080808] px-3 py-3">
       {icons.map((src, i) => (
         <div
           key={i}
-          className="relative flex size-13 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-black shadow-[inset_0_0_20px_0_rgba(48,48,48,0.25)]"
+          className="relative flex size-13 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-black p-2.5 shadow-[inset_0_0_20px_0_rgba(48,48,48,0.25)]"
         >
-          <Image src={src} alt="" width={28} height={28} className="object-contain" />
+          <Image src={src} alt="" width={24} height={24} className="size-full object-contain" />
         </div>
       ))}
     </div>
@@ -50,15 +51,7 @@ function DockIconRow({ icons }: { icons: string[] }) {
 export default function Hero() {
   return (
     <section id="home" className="relative w-full">
-      <div className="relative mx-auto hidden h-[280px] w-full max-w-[1040px] border-x-[0.5px] border-border sm:block sm:h-[340px] lg:h-[434px]">
-        <Image
-          src="/images/hero-banner-graphic.svg"
-          alt=""
-          fill
-          className="pointer-events-none select-none object-cover"
-          priority
-        />
-      </div>
+      <MazePetBuddy />
 
       {/* Profile bar */}
       <FadeIn>
@@ -68,7 +61,7 @@ export default function Hero() {
               <div className="relative size-[47px] shrink-0 overflow-hidden rounded-full border-[0.5px] border-border bg-[#161618] shadow-[inset_0_0_10px_0_#232323]">
                 <Image src="/images/profile-avatar.jpg" alt="Syed Ali" fill className="object-cover" />
               </div>
-              <div className="border-r-[0.5px] border-border pr-4">
+              <div className="flex flex-col justify-center self-stretch border-r-[0.5px] border-border pr-4">
                 <p className="text-xl font-medium text-[#979797]">Syed Ali</p>
                 <p className="bg-gradient-to-b from-[#d97757] to-[#733f2e] bg-clip-text text-xs text-transparent">
                   Design Engineer
@@ -77,7 +70,7 @@ export default function Hero() {
 
               <div className="ml-auto flex items-center gap-2">
                 <div className="flex size-6 shrink-0 items-center justify-center rounded-md border-[0.5px] border-white/10 bg-[#27272a]">
-                  <Image src="/images/dock-icon-16.png" alt="" width={14} height={14} className="rounded-sm" />
+                  <Image src="/images/dock-icon-16.png" alt="" width={16} height={16} className="rounded-sm" />
                 </div>
                 <button
                   type="button"
@@ -85,7 +78,7 @@ export default function Hero() {
                   disabled
                   className="flex size-6 shrink-0 items-center justify-center rounded-md border-[0.5px] border-white/10 bg-[#27272a] disabled:cursor-not-allowed"
                 >
-                  <Image src="/images/mode-night-icon-2.svg" alt="" width={14} height={14} />
+                  <Image src="/images/mode-night-icon-2.svg" alt="" width={16} height={16} />
                 </button>
               </div>
             </div>
