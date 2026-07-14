@@ -43,8 +43,6 @@ export default function MazePetBuddy() {
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    gsap.set(pet, { xPercent: -50, yPercent: -100, transformOrigin: "50% 100%" });
-
     const walkCycle = gsap.to(legs, {
       rotate: 14,
       duration: 0.14,
@@ -101,7 +99,7 @@ export default function MazePetBuddy() {
 
       <svg
         viewBox="0 0 1040 434"
-        preserveAspectRatio="none"
+        preserveAspectRatio="xMidYMid slice"
         className="absolute inset-0 size-full"
         onClick={restart}
         role="button"
@@ -109,7 +107,7 @@ export default function MazePetBuddy() {
       >
         {/* the motion path itself is not drawn — the buddy walks along the
             artwork's own line, nothing extra painted on top of it */}
-        <g ref={petRef}>
+        <g ref={petRef} style={{ transformBox: "fill-box", transformOrigin: "50% 100%" }}>
           <g
             filter="url(#petOutline)"
             transform="scale(0.16)"
