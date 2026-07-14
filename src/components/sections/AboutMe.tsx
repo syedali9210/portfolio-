@@ -11,7 +11,7 @@ export default function AboutMe() {
     >
       <SectionHeading>/About me</SectionHeading>
 
-      <FadeIn className="mt-10 border-y-[0.5px] border-border px-2 py-6 sm:px-3">
+      <FadeIn className="screen-line-top screen-line-bottom mt-10 px-2 py-6 sm:px-3">
         <p className="text-lg leading-relaxed text-[#7a7a7a] sm:text-xl">
           An engineering student that somehow ended up in design. A product designer, UI/UX
           designer, a design engineer... call me whatever you want.

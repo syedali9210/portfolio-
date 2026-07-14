@@ -37,9 +37,9 @@ function DockIconRow({ icons }: { icons: string[] }) {
       {icons.map((src, i) => (
         <div
           key={i}
-          className="relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-black shadow-[inset_0_0_20px_0_rgba(48,48,48,0.25)]"
+          className="relative flex size-13 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-black shadow-[inset_0_0_20px_0_rgba(48,48,48,0.25)]"
         >
-          <Image src={src} alt="" width={26} height={26} className="object-contain" />
+          <Image src={src} alt="" width={32} height={32} className="object-contain" />
         </div>
       ))}
     </div>
@@ -63,7 +63,7 @@ export default function Hero() {
       <FadeIn>
         <div className="screen-line-bottom mx-auto flex w-full max-w-[1040px] flex-col border-x-[0.5px] border-border md:flex-row md:items-start md:justify-between">
           <div className="flex w-full flex-col">
-            <div className="flex items-center gap-2 border-b-[0.5px] border-border px-4 py-3">
+            <div className="screen-line-bottom flex items-center gap-2 px-4 py-3">
               <div className="relative size-[47px] shrink-0 overflow-hidden rounded-full border-[0.5px] border-border bg-[#161618] shadow-[inset_0_0_10px_0_#232323]">
                 <Image src="/images/profile-avatar.jpg" alt="Syed Ali" fill className="object-cover" />
               </div>
@@ -75,7 +75,7 @@ export default function Hero() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-x-4 gap-y-3 border-b-[0.5px] border-border p-4 sm:grid-cols-2">
+            <div className="screen-line-bottom grid grid-cols-1 gap-x-4 gap-y-3 p-4 sm:grid-cols-2">
               {INFO_ITEMS.map((item) => (
                 <div
                   key={item.label}
@@ -101,7 +101,7 @@ export default function Hero() {
               </div>
             </div>
 
-            <div className="border-t-[0.5px] border-border px-4 py-4">
+            <div className="px-4 py-4">
               <p className="text-lg text-[#7a7a7a] sm:text-xl">
                 The guy who designs things and brings them to life, cuz why not. Engineering taught
                 me to do things the unconventional way.
@@ -176,7 +176,7 @@ export default function Hero() {
 
         {/* Yapping — runs edge-to-edge within the dock box, matching Figma (no horizontal inset) */}
         <div className="flex flex-col">
-          <div className="flex items-center justify-between border-y-[0.5px] border-border px-3 py-1 sm:px-4">
+          <div className="screen-line-top screen-line-bottom flex items-center justify-between px-3 py-1 sm:px-4">
             <p className="text-base text-[#7a7a7a]">*Yapping each aspect</p>
             <span className="rotate-90 text-[#7a7a7a]">{">"}</span>
           </div>
@@ -193,7 +193,7 @@ export default function Hero() {
           ].map((item) => (
             <div
               key={item.n}
-              className="flex gap-6 border-b-[0.5px] border-border px-3 py-4 sm:gap-10 sm:px-4"
+              className="screen-line-bottom flex gap-6 px-3 py-4 sm:gap-10 sm:px-4"
             >
               <div className="flex shrink-0 items-center gap-2">
                 <span className="text-sm text-white">[{item.n}]</span>
