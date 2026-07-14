@@ -49,8 +49,8 @@ export default function Nav() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/90 backdrop-blur">
-      <div className="mx-auto flex w-full max-w-[1040px] items-center justify-between border-x border-border px-5 py-3">
+    <header className="sticky top-0 z-50 w-full border-b-[0.5px] border-border bg-background/90 backdrop-blur">
+      <div className="mx-auto flex w-full max-w-[1040px] items-center justify-between border-x-[0.5px] border-border px-5 py-3">
         <a href="#home" className="text-base text-muted-foreground">
           Syed.Ali
         </a>

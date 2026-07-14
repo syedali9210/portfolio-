@@ -5,7 +5,7 @@ import { projects } from "@/data/projects";
 
 export default function Projects() {
   return (
-    <section id="projects" className="mx-auto w-full max-w-[1040px] border-x border-border px-2 py-10 sm:px-4">
+    <section id="projects" className="mx-auto w-full max-w-[1040px] border-x-[0.5px] border-border px-2 py-10 sm:px-4">
       <SectionHeading>/Projects</SectionHeading>
 
       <div className="mt-10 flex flex-col gap-10 sm:gap-[52px]">

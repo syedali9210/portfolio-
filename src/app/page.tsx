@@ -1,4 +1,5 @@
 import Nav from "@/components/Nav";
+import SectionDivider from "@/components/SectionDivider";
 import Hero from "@/components/sections/Hero";
 import Projects from "@/components/sections/Projects";
 import AboutMe from "@/components/sections/AboutMe";
@@ -11,9 +12,13 @@ export default function Home() {
       <Nav />
       <main className="flex flex-1 flex-col">
         <Hero />
+        <SectionDivider />
         <Projects />
+        <SectionDivider />
         <AboutMe />
+        <SectionDivider />
         <MySpace />
+        <SectionDivider />
       </main>
       <Contact />
     </>
