@@ -107,41 +107,8 @@ export default function MazePetBuddy() {
         role="button"
         aria-label="Restart the pet buddy's walk"
       >
-        {/* depth: a dark offset "riser" copy of the walked route beneath it,
-            plus vertical connector ticks at each vertex, so it reads as a
-            walkway with height rather than a flat line — same idea as
-            chanhdai.com's layered/shadowed line treatment */}
-        <path
-          d={PATH_D}
-          transform="translate(0,9)"
-          fill="none"
-          stroke="#000000"
-          strokeOpacity="0.5"
-          strokeWidth="4"
-          strokeLinejoin="round"
-          strokeLinecap="round"
-        />
-        {PATH_POINTS.map(([x, y]) => (
-          <line
-            key={`${x}-${y}`}
-            x1={x}
-            y1={y}
-            x2={x}
-            y2={y + 9}
-            stroke="#000000"
-            strokeOpacity="0.35"
-            strokeWidth="1.5"
-          />
-        ))}
-        <path
-          d={PATH_D}
-          fill="none"
-          stroke="#d97757"
-          strokeWidth="2.5"
-          strokeLinejoin="round"
-          strokeLinecap="round"
-        />
-
+        {/* the motion path itself is not drawn — the buddy walks along the
+            artwork's own line, nothing extra painted on top of it */}
         <g ref={petRef}>
           <g
             filter="url(#petOutline)"
