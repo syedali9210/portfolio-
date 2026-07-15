@@ -7,7 +7,7 @@ export default function Projects() {
   return (
     <section
       id="projects"
-      className="screen-line-top screen-line-bottom mx-auto w-full max-w-[1040px] border-x-[0.5px] border-border py-10"
+      className="screen-line-top screen-line-bottom mx-auto w-full max-w-[840px] border-x-[0.5px] border-border py-10"
     >
       <SectionHeading>/Projects</SectionHeading>
 

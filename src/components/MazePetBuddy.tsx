@@ -88,7 +88,7 @@ export default function MazePetBuddy() {
   };
 
   return (
-    <div className="relative mx-auto hidden h-[280px] w-full max-w-[1040px] cursor-pointer overflow-hidden border-x-[0.5px] border-border sm:block sm:h-[340px] lg:h-[434px]">
+    <div className="relative mx-auto hidden h-[280px] w-full max-w-[840px] cursor-pointer overflow-hidden border-x-[0.5px] border-border sm:block sm:h-[340px] lg:h-[434px]">
       <Image
         src="/images/hero-banner-graphic.svg"
         alt=""
