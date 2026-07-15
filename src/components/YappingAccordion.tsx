@@ -48,9 +48,9 @@ export default function YappingAccordion() {
               <div key={item.n} className="screen-line-bottom flex gap-6 px-3 py-4 sm:gap-10 sm:px-4">
                 <div className="flex shrink-0 items-center gap-2">
                   <Image src="/images/numbered-item-arrow.svg" alt="" width={21} height={12} />
-                  <span className="text-sm text-white">[{item.n}]</span>
+                  <span className="text-base text-white">[{item.n}]</span>
                 </div>
-                <p className="text-lg text-[#7a7a7a] sm:text-xl">{item.text}</p>
+                <p className="text-base text-[#7a7a7a]">{item.text}</p>
               </div>
             ))}
           </motion.div>

@@ -15,16 +15,16 @@ export default function ProjectCard({ project }: { project: Project }) {
       <div className="flex flex-col items-start gap-4">
         <div className="flex flex-wrap items-center gap-2.5">
           <div className="flex h-[30px] items-center rounded border-[0.5px] border-[#39393d] bg-[#27272a] px-4">
-            <p className="text-base text-[#565656] sm:text-lg">{project.title}</p>
+            <p className="text-base text-[#565656]">{project.title}</p>
           </div>
-          <p className="text-lg text-[#7a7a7a] sm:text-xl">| {project.meta}</p>
+          <p className="text-base text-[#7a7a7a]">| {project.meta}</p>
         </div>
 
         <div className="flex items-center justify-center rounded border-[0.5px] border-[#39393d] bg-[#27272a] px-3 py-1.5">
-          <p className="text-sm text-[#565656]">{project.tag}</p>
+          <p className="text-base text-[#565656]">{project.tag}</p>
         </div>
 
-        <p className="text-lg text-[#7a7a7a] sm:text-xl">{project.description}</p>
+        <p className="text-base text-[#7a7a7a]">{project.description}</p>
       </div>
     </div>
   );

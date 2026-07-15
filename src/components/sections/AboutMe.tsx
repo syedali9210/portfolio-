@@ -12,11 +12,11 @@ export default function AboutMe() {
       <SectionHeading>/About me</SectionHeading>
 
       <FadeIn className="screen-line-top screen-line-bottom mt-10 px-2 py-6 sm:px-3">
-        <p className="text-lg leading-relaxed text-[#7a7a7a] sm:text-xl">
+        <p className="text-base leading-relaxed text-[#7a7a7a]">
           An engineering student that somehow ended up in design. A product designer, UI/UX
           designer, a design engineer... call me whatever you want.
         </p>
-        <p className="mt-4 text-lg leading-relaxed text-[#7a7a7a] sm:text-xl">
+        <p className="mt-4 text-base leading-relaxed text-[#7a7a7a]">
           At the end of the day, I just like bringing ideas to life and shipping things that people
           can actually use. Turns out watching something go from a random thought to a real product
           is way more fun than it should be.

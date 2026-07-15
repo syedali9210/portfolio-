@@ -62,8 +62,8 @@ export default function Hero() {
                 <Image src="/images/profile-avatar.jpg" alt="Syed Ali" fill className="object-cover" />
               </div>
               <div className="flex flex-col justify-center self-stretch border-r-[0.5px] border-border pr-4">
-                <p className="text-xl font-medium text-[#979797]">Syed Ali</p>
-                <p className="bg-gradient-to-b from-[#d97757] to-[#733f2e] bg-clip-text text-xs text-transparent">
+                <p className="text-2xl font-medium text-[#979797]">Syed Ali</p>
+                <p className="bg-gradient-to-b from-[#d97757] to-[#733f2e] bg-clip-text text-base text-transparent">
                   Design Engineer
                 </p>
               </div>
@@ -93,11 +93,11 @@ export default function Hero() {
                     <Image src={item.icon} alt="" width={16} height={16} />
                   </div>
                   {item.href ? (
-                    <a href={item.href} className="text-sm text-[#fafafa] hover:underline">
+                    <a href={item.href} className="text-base text-[#fafafa] hover:underline">
                       {item.label}
                     </a>
                   ) : (
-                    <p className="text-sm text-[#fafafa]">{item.label}</p>
+                    <p className="text-base text-[#fafafa]">{item.label}</p>
                   )}
                 </div>
               ))}
@@ -110,7 +110,7 @@ export default function Hero() {
             </div>
 
             <div className="px-4 py-4">
-              <p className="text-lg text-[#7a7a7a] sm:text-xl">
+              <p className="text-base text-[#7a7a7a]">
                 The guy who designs things and brings them to life, cuz why not. Engineering taught
                 me to do things the unconventional way.
               </p>

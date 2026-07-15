@@ -34,15 +34,15 @@ export default function MySpace() {
       <SectionHeading>/My Space</SectionHeading>
 
       <FadeIn className="screen-line-top screen-line-bottom mt-10 px-2 sm:px-3">
-        <p className="text-lg leading-relaxed text-[#7a7a7a] sm:text-xl">
+        <p className="text-base leading-relaxed text-[#7a7a7a]">
           From developing my own portfolio to making my own pet buddy like Claude, this idea came to
           my mind while i was glued to my desk while making my portfolio with my earphones on.
         </p>
-        <p className="mt-4 text-lg leading-relaxed text-[#7a7a7a] sm:text-xl">
+        <p className="mt-4 text-base leading-relaxed text-[#7a7a7a]">
           There are some hidden animations of the pet buddy across my portfolio, which you can see
           while hovering over the elements.
         </p>
-        <p className="mt-4 text-lg leading-relaxed text-[#7a7a7a] sm:text-xl">
+        <p className="mt-4 text-base leading-relaxed text-[#7a7a7a]">
           I want to make my pet buddy a completely banger pet buddy. The upcoming version of it will
           have better interactions, animation, more texture and more feelings to it, stay tuned to
           see the Pet Buddy coming fully alive :)
@@ -57,7 +57,7 @@ export default function MySpace() {
                 <TabsTrigger
                   key={tab.value}
                   value={tab.value}
-                  className="rounded-xl bg-[rgba(84,84,84,0.1)] px-4 py-2 text-sm font-medium text-muted-foreground data-active:bg-[rgba(84,84,84,0.25)] data-active:text-[#fafafa]"
+                  className="rounded-xl bg-[rgba(84,84,84,0.1)] px-4 py-2 text-base font-medium text-muted-foreground data-active:bg-[rgba(84,84,84,0.25)] data-active:text-[#fafafa]"
                 >
                   {tab.label}
                 </TabsTrigger>
@@ -68,7 +68,7 @@ export default function MySpace() {
           {TABS.map((tab) => (
             <TabsContent key={tab.value} value={tab.value} className="mt-6">
               <div className="flex min-h-[320px] w-full items-center justify-center rounded-xl bg-[#1f1f1f] p-10 text-center sm:min-h-[520px]">
-                <p className="max-w-lg text-lg text-[#7a7a7a]">{tab.content}</p>
+                <p className="max-w-lg text-base text-[#7a7a7a]">{tab.content}</p>
               </div>
             </TabsContent>
           ))}

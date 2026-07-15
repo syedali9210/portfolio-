@@ -28,19 +28,19 @@ export default function Contact() {
         {/* top: contact details on the left, a closing note on the right */}
         <div className="flex flex-col gap-10 border-b border-[#5f5f5f] pb-6 md:flex-row md:justify-between md:gap-[116px]">
           <div className="flex flex-col gap-12 sm:gap-[84px]">
-            <p className={`${LABEL} text-lg sm:text-xl`}>Syed Ali</p>
+            <p className={`${LABEL} text-2xl`}>Syed Ali</p>
 
             <div className="flex flex-wrap gap-8 sm:gap-[63px]">
               {CONTACT_INFO.map((item) => (
                 <div key={item.label} className="flex flex-col gap-2.5">
-                  <p className={`${LABEL} text-lg sm:text-xl`}>{item.label}</p>
+                  <p className={`${LABEL} text-base`}>{item.label}</p>
                   <div className="flex items-center gap-1.5">
                     <item.icon className="size-4 shrink-0 text-[#d1d1d1]" />
                     <a
                       href={item.href}
                       target={item.href.startsWith("http") ? "_blank" : undefined}
                       rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                      className="font-mono text-base tracking-[0.4px] text-[#d1d1d1] underline-offset-2 transition-colors hover:text-white hover:underline sm:text-xl"
+                      className="font-mono text-base tracking-[0.4px] text-[#d1d1d1] underline-offset-2 transition-colors hover:text-white hover:underline"
                     >
                       {item.value}
                     </a>
@@ -51,8 +51,8 @@ export default function Contact() {
           </div>
 
           <div className="flex flex-col gap-6 md:h-[132px] md:items-end md:justify-between md:text-right">
-            <p className={`${LABEL} text-lg sm:text-xl`}>Design Engineer</p>
-            <p className={`${LABEL} max-w-[353px] text-lg leading-relaxed sm:text-xl`}>
+            <p className={`${LABEL} text-base`}>Design Engineer</p>
+            <p className={`${LABEL} max-w-[353px] text-base leading-relaxed`}>
               You have been here till the end of the journey, lets have a conversation now.
             </p>
           </div>

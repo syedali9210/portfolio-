@@ -62,7 +62,7 @@ export default function Nav() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center rounded-full px-2 py-1 text-sm font-medium tracking-tight transition-colors",
+                  "flex items-center rounded-full px-2 py-1 text-base font-medium tracking-tight transition-colors",
                   active === item.href
                     ? "text-[#d6d6d6]"
                     : "text-muted-foreground hover:text-[#d6d6d6]"
