@@ -39,6 +39,9 @@ yarn-error.log*
 # git worktrees
 /.worktrees
 
+# motiscope analysis scratch output (reports + extracted frames)
+/.motiscope
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

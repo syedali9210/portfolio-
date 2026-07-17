@@ -21,8 +21,8 @@ export default function LiveClock() {
   }, []);
 
   return (
-    <p className="text-base text-[#fafafa]">
-      {time ?? "--:--"} <span className="text-[#9f9fa9]">IST</span>
+    <p className="text-base text-foreground">
+      {time ?? "--:--"} <span className="text-muted-foreground">IST</span>
     </p>
   );
 }

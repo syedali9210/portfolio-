@@ -1,69 +1,76 @@
-import { Mail, Phone } from "lucide-react";
-import FooterWave from "@/components/FooterWave";
-import LinkedinIcon from "@/components/icons/LinkedinIcon";
+"use client";
 
-const CONTACT_INFO = [
-  { label: "Call", icon: Phone, value: "+91 776 586 3700", href: "tel:+917765863700" },
+import { useTheme } from "next-themes";
+import { MailIcon, PhoneIcon } from "lucide-react";
+import ParticleImage from "@/components/ParticleImage";
+import LinkedinIcon from "@/components/icons/LinkedinIcon";
+import GithubIcon from "@/components/icons/GithubIcon";
+
+const EMAIL = "syedwali9286@gmail.com";
+
+const SOCIALS = [
   {
-    label: "Email",
-    icon: Mail,
-    value: "syedwali9286@gmail.com",
-    href: "mailto:syedwali9286@gmail.com",
+    label: "LinkedIn",
+    icon: LinkedinIcon,
+    href: "https://www.linkedin.com/in/syedali138/",
   },
   {
-    label: "Linkedin",
-    icon: LinkedinIcon,
-    value: "Syed_ali",
-    href: "https://www.linkedin.com/in/syedali138/",
+    label: "GitHub",
+    icon: GithubIcon,
+    href: "https://github.com/syedali9210",
   },
 ];
 
-// Soft top-to-bottom silver gradient shared by every label in the footer.
-const LABEL = "bg-gradient-to-b from-[#d1d1d1] to-[#6b6b6b] bg-clip-text tracking-wide text-transparent";
-
 export default function Contact() {
+  const { resolvedTheme } = useTheme();
+  const particleColor = resolvedTheme === "light" ? "#9a9a9a" : "#6b6b6b";
+
   return (
-    <section id="contact" className="relative px-6 py-16 sm:px-10 sm:py-24">
-      <div className="relative mx-auto flex max-w-[1320px] flex-col overflow-hidden rounded-2xl border-[0.5px] border-white/26 bg-gradient-to-b from-white/10 to-[#999999]/10 px-6 pt-10 shadow-[0px_10px_5px_rgba(0,0,0,0.15)] backdrop-blur-[48px] sm:px-[90px] sm:pt-[46px]">
-        {/* top: contact details on the left, a closing note on the right */}
-        <div className="flex flex-col gap-10 border-b border-[#5f5f5f] pb-6 md:flex-row md:justify-between md:gap-[116px]">
-          <div className="flex flex-col gap-12 sm:gap-[84px]">
-            <p className={`${LABEL} text-2xl`}>Syed Ali</p>
-
-            <div className="flex flex-wrap gap-8 sm:gap-[63px]">
-              {CONTACT_INFO.map((item) => (
-                <div key={item.label} className="flex flex-col gap-2.5">
-                  <p className={`${LABEL} text-base`}>{item.label}</p>
-                  <div className="flex items-center gap-1.5">
-                    <item.icon className="size-4 shrink-0 text-[#d1d1d1]" />
-                    <a
-                      href={item.href}
-                      target={item.href.startsWith("http") ? "_blank" : undefined}
-                      rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                      className="font-mono text-base tracking-[0.4px] text-[#d1d1d1] underline-offset-2 transition-colors hover:text-white hover:underline"
-                    >
-                      {item.value}
-                    </a>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-6 md:h-[132px] md:items-end md:justify-between md:text-right">
-            <p className={`${LABEL} text-base`}>Design Engineer</p>
-            <p className={`${LABEL} max-w-[353px] text-base leading-relaxed`}>
-              You have been here till the end of the journey, lets have a conversation now.
-            </p>
-          </div>
+    <section id="contact" className="relative flex flex-col items-center px-6 py-12 sm:py-20">
+      {/* Headline overlays the particle mark but doesn't block pointer events,
+          so cursor repulsion works across the whole shape */}
+      <div className="relative h-[480px] w-full max-w-[840px]">
+        <ParticleImage
+          imageConfig={{ image: "/images/syed-logo-mark.svg", mode: "fit", scale: 8 }}
+          particleCount={50}
+          particleSize={5}
+          particleColor="single"
+          singleColor={particleColor}
+          hoverEnabled={false}
+          style={{ width: "100%", height: "100%" }}
+        />
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
+          <p className="text-2xl font-medium text-foreground">Let&apos;s have a conversation now</p>
         </div>
+      </div>
 
-        {/* "CONTACT" rides the hills of the wave beneath it, so this needs
-            headroom above the wave's own box for the letters to rise into
-            without getting clipped by the panel's rounded corners. */}
-        <div className="-mx-6 mt-6 sm:-mx-[90px]">
-          <FooterWave />
-        </div>
+      <div className="mt-4 flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+        <a
+          href={`mailto:${EMAIL}`}
+          className="inline-flex items-center gap-2 text-base text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <MailIcon className="size-4" />
+          {EMAIL}
+        </a>
+        <a
+          href="tel:+917765863700"
+          className="inline-flex items-center gap-2 text-base text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <PhoneIcon className="size-4" />
+          +91 7765863700
+        </a>
+        {SOCIALS.map((social) => (
+          <a
+            key={social.label}
+            href={social.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={social.label}
+            className="text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <social.icon className="size-5" />
+          </a>
+        ))}
       </div>
     </section>
   );

@@ -1,12 +1,21 @@
 import type { Metadata } from "next";
-import { Inter, Geist_Mono } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
+import { ThemeProvider } from "next-themes";
 import { Agentation } from "agentation";
 import SmoothScroll from "@/components/SmoothScroll";
+import ViewportEdgeBlur from "@/components/ViewportEdgeBlur";
 import "./globals.css";
 
-const inter = Inter({
+const segoeUI = localFont({
+  src: [
+    { path: "./fonts/segoe-ui-light.otf", weight: "300", style: "normal" },
+    { path: "./fonts/segoe-ui-regular.otf", weight: "400", style: "normal" },
+    { path: "./fonts/segoe-ui-italic.otf", weight: "400", style: "italic" },
+    { path: "./fonts/segoe-ui-semibold.otf", weight: "600", style: "normal" },
+    { path: "./fonts/segoe-ui-bold.otf", weight: "700", style: "normal" },
+  ],
   variable: "--font-sans",
-  subsets: ["latin"],
 });
 
 const geistMono = Geist_Mono({
@@ -28,10 +37,14 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`dark ${inter.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${segoeUI.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <SmoothScroll>{children}</SmoothScroll>
+        <ThemeProvider attribute="class" defaultTheme="dark" disableTransitionOnChange>
+          <ViewportEdgeBlur />
+          <SmoothScroll>{children}</SmoothScroll>
+        </ThemeProvider>
         {process.env.NODE_ENV === "development" && (
           <Agentation endpoint="http://localhost:4747" />
         )}

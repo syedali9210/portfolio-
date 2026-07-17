@@ -1,18 +1,40 @@
 import Image from "next/image";
 import FadeIn from "@/components/FadeIn";
 import LiveClock from "@/components/LiveClock";
-import MazePetBuddy from "@/components/MazePetBuddy";
-import SectionDivider from "@/components/SectionDivider";
+import PetBuddyGreeting from "@/components/PetBuddyGreeting";
+import PetBuddyPathHero from "@/components/PetBuddyPathHero";
 import YappingAccordion from "@/components/YappingAccordion";
+import { CopyButton } from "@/components/copy-button";
+import { TextFlip } from "@/components/text-flip";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 
-const INFO_ITEMS = [
+const DESIGNATIONS = [
+  "Design engineer",
+  "The guy",
+  "Pixel perfectionist",
+  "can work without my cold coffee",
+];
+
+const INFO_ITEMS: {
+  icon: string;
+  label: string;
+  href?: string;
+  full?: boolean;
+  copyText?: string;
+}[] = [
   { icon: "/images/profile-icon-role.svg", label: "Design Engineer", href: undefined, full: true },
   { icon: "/images/profile-icon-location.svg", label: "Bengaluru, India", href: undefined },
-  { icon: "/images/profile-icon-phone.svg", label: "+91 7765863700", href: "tel:+917765863700" },
+  {
+    icon: "/images/profile-icon-phone.svg",
+    label: "+91 7765863700",
+    href: "tel:+917765863700",
+    copyText: "+91 7765863700",
+  },
   {
     icon: "/images/profile-icon-email.svg",
     label: "syedwali9286@gmail.com",
     href: "mailto:syedwali9286@gmail.com",
+    copyText: "syedwali9286@gmail.com",
   },
 ];
 
@@ -35,11 +57,11 @@ const DOCK_COLUMN_C = {
 
 function DockIconRow({ icons }: { icons: string[] }) {
   return (
-    <div className="flex flex-wrap items-center gap-2 rounded-xl border-[0.5px] border-border bg-[#080808] px-3 py-3">
+    <div className="flex flex-wrap items-center gap-1 rounded-lg bg-secondary px-1.5 py-1.5 sm:gap-2 sm:rounded-xl sm:px-3 sm:py-3">
       {icons.map((src, i) => (
         <div
           key={i}
-          className="relative flex size-13 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-black p-2.5 shadow-[inset_0_0_20px_0_rgba(48,48,48,0.25)]"
+          className="relative flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-md bg-black p-1.5 shadow-[inset_0_0_20px_0_rgba(48,48,48,0.25)] sm:size-13 sm:rounded-lg sm:p-2.5"
         >
           <Image src={src} alt="" width={24} height={24} className="size-full object-contain" />
         </div>
@@ -50,67 +72,81 @@ function DockIconRow({ icons }: { icons: string[] }) {
 
 export default function Hero() {
   return (
-    <section id="home" className="relative w-full">
-      <MazePetBuddy />
+    <section id="home" className="relative w-full py-12 sm:py-20">
+      <PetBuddyPathHero />
 
       {/* Profile bar */}
       <FadeIn>
-        <div className="screen-line-bottom mx-auto flex w-full max-w-[840px] flex-col border-x-[0.5px] border-border">
-          <div className="flex w-full flex-col">
-            <div className="screen-line-bottom flex items-center gap-2 px-4 py-3">
-              <div className="relative size-[47px] shrink-0 overflow-hidden rounded-full border-[0.5px] border-border bg-[#161618] shadow-[inset_0_0_10px_0_#232323]">
+        <div className="screen-line-bottom mx-auto flex w-full max-w-[680px] flex-col">
+          <div className="flex w-full flex-col px-4 sm:px-6">
+            <div className="screen-line-bottom flex items-center gap-2 py-3">
+              <div className="relative size-[47px] shrink-0 overflow-hidden rounded-full bg-card shadow-[inset_0_0_10px_0_#232323]">
                 <Image src="/images/profile-avatar.jpg" alt="Syed Ali" fill className="object-cover" />
               </div>
-              <div className="flex flex-col justify-center self-stretch border-r-[0.5px] border-border pr-4">
-                <p className="text-2xl font-medium text-[#979797]">Syed Ali</p>
-                <p className="bg-gradient-to-b from-[#d97757] to-[#733f2e] bg-clip-text text-base text-transparent">
-                  Design Engineer
-                </p>
+              <div className="flex flex-col justify-center self-stretch pr-4">
+                <p className="text-xl font-medium text-foreground">Syed Ali</p>
+                <span className="inline-grid text-base">
+                  {/* Placeholder for the longest phrase keeps the row height/width stable. */}
+                  <span className="invisible col-start-1 row-start-1 whitespace-nowrap" aria-hidden>
+                    {DESIGNATIONS.reduce((a, b) => (a.length >= b.length ? a : b))}
+                  </span>
+                  <TextFlip className="col-start-1 row-start-1">
+                    {DESIGNATIONS.map((phrase) => (
+                      <span
+                        key={phrase}
+                        className="bg-gradient-to-b from-[#d97757] to-[#733f2e] bg-clip-text text-transparent"
+                      >
+                        {phrase}
+                      </span>
+                    ))}
+                  </TextFlip>
+                </span>
               </div>
 
               <div className="ml-auto flex items-center gap-2">
-                <div className="flex size-6 shrink-0 items-center justify-center rounded-md border-[0.5px] border-white/10 bg-[#27272a]">
+                <div className="flex size-6 shrink-0 items-center justify-center rounded-md bg-secondary">
                   <Image src="/images/dock-icon-16.png" alt="" width={16} height={16} className="rounded-sm" />
                 </div>
-                <button
-                  type="button"
-                  aria-label="Theme toggle (coming soon)"
-                  disabled
-                  className="flex size-6 shrink-0 items-center justify-center rounded-md border-[0.5px] border-white/10 bg-[#27272a] disabled:cursor-not-allowed"
-                >
-                  <Image src="/images/mode-night-icon-2.svg" alt="" width={16} height={16} />
-                </button>
+                <ThemeSwitcher />
               </div>
             </div>
 
-            <div className="screen-line-bottom grid grid-cols-1 gap-x-4 gap-y-3 p-4 sm:grid-cols-2">
+            <div className="screen-line-bottom grid grid-cols-1 gap-x-4 gap-y-3 py-4 sm:grid-cols-2">
               {INFO_ITEMS.map((item) => (
                 <div
                   key={item.label}
                   className={`flex items-center gap-4 ${item.full ? "sm:col-span-2" : ""}`}
                 >
-                  <div className="flex size-6 shrink-0 items-center justify-center rounded-md border-[0.5px] border-white/10 bg-[#27272a]">
+                  <div className="flex size-6 shrink-0 items-center justify-center rounded-md bg-secondary">
                     <Image src={item.icon} alt="" width={16} height={16} />
                   </div>
                   {item.href ? (
-                    <a href={item.href} className="text-base text-[#fafafa] hover:underline">
+                    <a href={item.href} className="text-base text-foreground hover:underline">
                       {item.label}
                     </a>
                   ) : (
-                    <p className="text-base text-[#fafafa]">{item.label}</p>
+                    <p className="text-base text-foreground">{item.label}</p>
+                  )}
+                  {item.copyText && (
+                    <CopyButton
+                      className="relative -ml-2"
+                      variant="ghost"
+                      size="icon-xs"
+                      text={item.copyText}
+                    />
                   )}
                 </div>
               ))}
               <div className="flex items-center gap-4">
-                <div className="flex size-6 shrink-0 items-center justify-center rounded-md border-[0.5px] border-white/10 bg-[#27272a]">
+                <div className="flex size-6 shrink-0 items-center justify-center rounded-md bg-secondary">
                   <Image src="/images/profile-icon-clock.svg" alt="" width={16} height={16} />
                 </div>
                 <LiveClock />
               </div>
             </div>
 
-            <div className="px-4 py-4">
-              <p className="text-base text-[#7a7a7a]">
+            <div className="py-4">
+              <p className="text-base text-muted-foreground">
                 The guy who designs things and brings them to life, cuz why not. Engineering taught
                 me to do things the unconventional way.
               </p>
@@ -119,44 +155,42 @@ export default function Hero() {
         </div>
       </FadeIn>
 
-      <SectionDivider />
-
       {/* Dock + Yapping */}
-      <div className="screen-line-top screen-line-bottom mx-auto w-full max-w-[840px] border-x-[0.5px] border-border">
-        <div className="grid grid-cols-1 gap-6 px-4 py-10 sm:px-8 md:grid-cols-3">
-          <FadeIn delay={0.05} className="flex flex-col gap-3">
+      <div className="screen-line-top screen-line-bottom mx-auto w-full max-w-[680px]">
+        <div className="grid grid-cols-3 gap-2 px-4 py-8 sm:gap-6 sm:px-6">
+          <FadeIn delay={0.05} className="flex flex-col gap-1.5 sm:gap-3">
             <DockIconRow icons={DOCK_COLUMN_A.icons} />
-            <div className="overflow-hidden rounded-xl border-[0.5px] border-border bg-[#080808] p-3">
-              <div className="relative aspect-[274/151] w-full overflow-hidden rounded-[14px] shadow-[inset_0_0_33px_0_rgba(48,48,48,0.25)]">
+            <div className="overflow-hidden rounded-lg bg-secondary p-1.5 sm:rounded-xl sm:p-3">
+              <div className="relative aspect-[274/151] w-full overflow-hidden rounded-md shadow-[inset_0_0_33px_0_rgba(48,48,48,0.25)] sm:rounded-[14px]">
                 <Image src={DOCK_COLUMN_A.shot} alt="Framer workspace screenshot" fill className="object-cover" />
               </div>
             </div>
           </FadeIn>
 
-          <FadeIn delay={0} className="flex flex-col gap-3">
-            <div className="flex flex-col gap-3 rounded-xl border-[0.5px] border-border bg-[#080808] p-3">
-              <Image src="/images/window-controls-active.svg" alt="" width={46} height={10} />
-              <div className="flex gap-3">
-                <div className="relative aspect-[200/230] w-full overflow-hidden rounded-xl shadow-[inset_0_0_33px_0_rgba(48,48,48,0.25)]">
+          <FadeIn delay={0} className="flex flex-col gap-1.5 sm:gap-3">
+            <div className="flex flex-col gap-1.5 rounded-lg bg-secondary p-1.5 sm:gap-3 sm:rounded-xl sm:p-3">
+              <Image src="/images/window-controls-active.svg" alt="" width={46} height={10} className="w-6 sm:w-[46px]" />
+              <div className="flex gap-1.5 sm:gap-3">
+                <div className="relative aspect-[200/230] w-full overflow-hidden rounded-md shadow-[inset_0_0_33px_0_rgba(48,48,48,0.25)] sm:rounded-xl">
                   <Image src="/images/dock-shot-80.png" alt="FigJam board screenshot" fill className="object-cover" />
                 </div>
-                <div className="flex w-24 shrink-0 flex-col gap-3">
-                  <div className="flex flex-1 items-center justify-center rounded-md bg-black shadow-[inset_0_0_33px_0_rgba(48,48,48,0.25)]">
-                    <Image src="/images/dock-icon-16.png" alt="" width={28} height={28} />
+                <div className="hidden w-24 shrink-0 flex-col gap-3 sm:flex">
+                  <div className="flex min-h-[100px] flex-1 items-center justify-center overflow-hidden rounded-md bg-secondary shadow-[inset_0_0_33px_0_rgba(48,48,48,0.25)]">
+                    <PetBuddyGreeting text="Hii!" size={48} loop={4} />
                   </div>
-                  <div className="flex-1 rounded-md bg-black shadow-[inset_0_0_33px_0_rgba(48,48,48,0.25)]" />
+                  <div className="flex-1 rounded-md bg-secondary shadow-[inset_0_0_33px_0_rgba(48,48,48,0.25)]" />
                 </div>
               </div>
             </div>
           </FadeIn>
 
-          <FadeIn delay={0.1} className="flex flex-col gap-3">
+          <FadeIn delay={0.1} className="flex flex-col gap-1.5 sm:gap-3">
             <DockIconRow icons={DOCK_COLUMN_C.icons} />
-            <div className="flex gap-2 overflow-hidden rounded-xl border-[0.5px] border-border bg-[#080808] p-3">
-              <div className="relative aspect-[240/155] w-2/3 overflow-hidden rounded-lg shadow-[inset_0_0_33px_0_rgba(48,48,48,0.25)]">
+            <div className="flex gap-1 overflow-hidden rounded-lg bg-secondary p-1.5 sm:gap-2 sm:rounded-xl sm:p-3">
+              <div className="relative aspect-[240/155] w-2/3 overflow-hidden rounded-md shadow-[inset_0_0_33px_0_rgba(48,48,48,0.25)] sm:rounded-lg">
                 <Image src={DOCK_COLUMN_C.shots[0]} alt="Antigravity IDE screenshot" fill className="object-cover" />
               </div>
-              <div className="flex w-1/3 flex-col gap-1.5">
+              <div className="flex w-1/3 flex-col gap-1 sm:gap-1.5">
                 <div className="relative flex-1 overflow-hidden rounded shadow-[inset_0_0_33px_0_rgba(48,48,48,0.25)]">
                   <Image src={DOCK_COLUMN_C.shots[1]} alt="" fill className="object-cover" />
                 </div>

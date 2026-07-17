@@ -1,19 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import { cn } from "@/lib/utils";
 
+// Absolute ("/#hash") rather than bare ("#hash") so these still work when
+// clicked from a sub-page like /projects/[slug] instead of silently
+// rewriting the URL hash with nothing on the page to scroll to.
 const NAV_ITEMS = [
-  { label: "Projects", href: "#projects" },
-  { label: "My Space", href: "#my-space" },
-  { label: "About me", href: "#about-me" },
-  { label: "Contact", href: "#contact" },
+  { label: "Projects", href: "/#projects" },
+  { label: "My Space", href: "/#my-space" },
+  { label: "About me", href: "/#about-me" },
+  { label: "Contact", href: "/#contact" },
 ];
 
 export default function Nav() {
   const [time, setTime] = useState<string | null>(null);
-  const [active, setActive] = useState("#projects");
+  const [active, setActive] = useState("/#projects");
 
   useEffect(() => {
     const update = () =>
@@ -30,16 +32,16 @@ export default function Nav() {
   }, []);
 
   useEffect(() => {
-    const sections = NAV_ITEMS.map((item) => document.querySelector(item.href)).filter(
-      (el): el is Element => !!el
-    );
+    const sections = NAV_ITEMS.map((item) =>
+      document.querySelector(`#${item.href.split("#")[1]}`)
+    ).filter((el): el is Element => !!el);
     if (!sections.length) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
         const visible = entries.filter((e) => e.isIntersecting);
         if (visible.length) {
-          setActive(`#${visible[0].target.id}`);
+          setActive(`/#${visible[0].target.id}`);
         }
       },
       { rootMargin: "-40% 0px -55% 0px" }
@@ -49,9 +51,9 @@ export default function Nav() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b-[0.5px] border-border bg-background/90 backdrop-blur">
-      <div className="mx-auto flex w-full max-w-[840px] items-center justify-between border-x-[0.5px] border-border px-5 py-3">
-        <a href="#home" className="text-base text-muted-foreground">
+    <header className="sticky top-0 z-50 w-full bg-background/90 backdrop-blur">
+      <div className="mx-auto flex w-full max-w-[680px] items-center justify-between px-4 py-3 sm:px-6">
+        <a href="/#home" className="text-base text-muted-foreground">
           Syed.Ali
         </a>
 
@@ -64,8 +66,8 @@ export default function Nav() {
                 className={cn(
                   "flex items-center rounded-full px-2 py-1 text-base font-medium tracking-tight transition-colors",
                   active === item.href
-                    ? "text-[#d6d6d6]"
-                    : "text-muted-foreground hover:text-[#d6d6d6]"
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
                 )}
               >
                 {item.label}
@@ -79,9 +81,6 @@ export default function Nav() {
         </span>
       </div>
 
-      <div className="pointer-events-none fixed left-8 top-1/2 hidden -translate-y-1/2 opacity-40 lg:block">
-        <Image src="/images/menu-icon.svg" alt="" width={28} height={30} />
-      </div>
     </header>
   );
 }
