@@ -3,20 +3,21 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useActiveSection } from "@/hooks/use-active-section";
 
 // Absolute ("/#hash") rather than bare ("#hash") so these still work when
 // clicked from a sub-page like /projects/[slug] instead of silently
 // rewriting the URL hash with nothing on the page to scroll to.
-const NAV_ITEMS = [
-  { label: "Projects", href: "/#projects" },
-  { label: "My Space", href: "/#my-space" },
-  { label: "About me", href: "/#about-me" },
-  { label: "Contact", href: "/#contact" },
+export const NAV_ITEMS = [
+  { id: "projects", label: "Projects", href: "/#projects" },
+  { id: "about-me", label: "About me", href: "/#about-me" },
+  { id: "my-space", label: "My Space", href: "/#my-space" },
+  { id: "contact", label: "Contact", href: "/#contact" },
 ];
 
 export default function Nav() {
   const [time, setTime] = useState<string | null>(null);
-  const [active, setActive] = useState("/#projects");
+  const activeId = useActiveSection(NAV_ITEMS.map((item) => item.id));
 
   useEffect(() => {
     const update = () =>
@@ -32,25 +33,6 @@ export default function Nav() {
     return () => clearInterval(id);
   }, []);
 
-  useEffect(() => {
-    const sections = NAV_ITEMS.map((item) =>
-      document.querySelector(`#${item.href.split("#")[1]}`)
-    ).filter((el): el is Element => !!el);
-    if (!sections.length) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries.filter((e) => e.isIntersecting);
-        if (visible.length) {
-          setActive(`/#${visible[0].target.id}`);
-        }
-      },
-      { rootMargin: "-40% 0px -55% 0px" }
-    );
-    sections.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
-
   return (
     <header className="sticky top-0 z-50 w-full">
       <div className="mx-auto flex w-full max-w-[680px] items-center justify-between px-4 py-3 sm:px-6">
@@ -58,7 +40,7 @@ export default function Nav() {
           Syed.Ali
         </Link>
 
-        <nav className="flex items-center gap-2 rounded-full p-1">
+        <nav className="hidden items-center gap-2 rounded-full bg-muted p-1.5 sm:flex">
           <div className="flex items-center gap-6 sm:gap-10">
             {NAV_ITEMS.map((item) => (
               <a
@@ -66,7 +48,7 @@ export default function Nav() {
                 href={item.href}
                 className={cn(
                   "flex items-center rounded-full px-2 py-1 text-base font-medium tracking-tight transition-colors",
-                  active === item.href
+                  activeId === item.id
                     ? "text-foreground"
                     : "text-muted-foreground hover:text-foreground"
                 )}

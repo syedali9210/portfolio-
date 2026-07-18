@@ -1,4 +1,5 @@
 import Nav from "@/components/Nav";
+import MobileNav from "@/components/MobileNav";
 import Scrubber from "@/components/Scrubber";
 import Hero from "@/components/sections/Hero";
 import Projects from "@/components/sections/Projects";
@@ -20,6 +21,7 @@ export default function Home() {
   return (
     <>
       <Nav />
+      <MobileNav />
       <Scrubber items={HOME_ITEMS} />
       <main className="flex flex-1 flex-col">
         <Hero />

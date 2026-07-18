@@ -395,12 +395,17 @@ interface TabItemProps
   value: string;
   icon?: IconComponent;
   label: string;
+  /** Renders icon-only, keeping the label for screen readers via `sr-only`. */
+  iconOnly?: boolean;
   /** @internal Auto-assigned by TabsList. */
   _index?: number;
 }
 
 const TabItem = forwardRef<HTMLButtonElement, TabItemProps>(
-  ({ value, icon: Icon, label, _index = 0, className, onClick, ...props }, ref) => {
+  (
+    { value, icon: Icon, label, iconOnly = false, _index = 0, className, onClick, ...props },
+    ref
+  ) => {
     const internalRef = useRef<HTMLButtonElement>(null);
     const { registerTab, hoveredIndex, selectedValue, setOptimisticIdx } = useTabsList();
 
@@ -436,6 +441,7 @@ const TabItem = forwardRef<HTMLButtonElement, TabItemProps>(
           // Fixed height (not py) so the text-box trim below doesn't shrink
           // the tab — browsers without text-box support render identically.
           "relative z-10 flex h-8 items-center gap-2 px-3 cursor-pointer bg-transparent border-none outline-none",
+          iconOnly && "justify-center gap-0 px-0",
           className
         )}
         {...props}
@@ -452,7 +458,7 @@ const TabItem = forwardRef<HTMLButtonElement, TabItemProps>(
         )}
         {/* Both stacked spans carry the text-box trim so the invisible bold
             sizer and the visible label keep identical boxes. */}
-        <span className="inline-grid text-[13px] whitespace-nowrap">
+        <span className={cn("inline-grid text-[13px] whitespace-nowrap", iconOnly && "sr-only")}>
           <span
             className="col-start-1 row-start-1 invisible [text-box:trim-both_cap_alphabetic]"
             style={{ fontVariationSettings: fontWeights.semibold }}

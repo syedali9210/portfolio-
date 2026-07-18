@@ -39,7 +39,14 @@ const INFO_ITEMS: {
 ];
 
 const DOCK_COLUMN_A = {
-  icons: ["/images/dock-icon-16.png", "/images/dock-icon-22.png", "/images/dock-icon-23.png", "/images/dock-icon-24.png"],
+  icons: [
+    "/images/dock-icon-16.png",
+    "/images/dock-icon-22.png",
+    "/images/dock-icon-23.png",
+    "/images/dock-icon-24.png",
+    "/images/icon-notion.png",
+    "/images/icon-paper.png",
+  ],
   shot: "/images/dock-shot-79.png",
 };
 
@@ -57,7 +64,7 @@ const DOCK_COLUMN_C = {
 
 function DockIconRow({ icons }: { icons: string[] }) {
   return (
-    <div className="flex flex-wrap items-center gap-1 rounded-lg bg-secondary px-1.5 py-1.5 sm:gap-2 sm:rounded-xl sm:px-3 sm:py-3">
+    <div className="grid shrink-0 grid-cols-3 gap-1 rounded-lg bg-secondary px-1.5 py-1.5 sm:gap-1.5 sm:rounded-xl sm:px-3 sm:py-3">
       {icons.map((src, i) => (
         <div
           key={i}
@@ -160,8 +167,8 @@ export default function Hero() {
         <div className="grid grid-cols-3 gap-2 px-4 py-8 sm:gap-6 sm:px-6">
           <FadeIn delay={0.05} className="flex flex-col gap-1.5 sm:gap-3">
             <DockIconRow icons={DOCK_COLUMN_A.icons} />
-            <div className="overflow-hidden rounded-lg bg-secondary p-1.5 sm:rounded-xl sm:p-3">
-              <div className="relative aspect-[274/151] w-full overflow-hidden rounded-md shadow-[inset_0_0_33px_0_rgba(48,48,48,0.25)] sm:rounded-[14px]">
+            <div className="aspect-[8/5] w-full overflow-hidden rounded-lg bg-secondary p-1.5 sm:rounded-xl sm:p-3">
+              <div className="relative h-full w-full overflow-hidden rounded-md shadow-[inset_0_0_33px_0_rgba(48,48,48,0.25)] sm:rounded-[14px]">
                 <Image src={DOCK_COLUMN_A.shot} alt="Framer workspace screenshot" fill className="object-cover" />
               </div>
             </div>
@@ -186,11 +193,11 @@ export default function Hero() {
 
           <FadeIn delay={0.1} className="flex flex-col gap-1.5 sm:gap-3">
             <DockIconRow icons={DOCK_COLUMN_C.icons} />
-            <div className="flex gap-1 overflow-hidden rounded-lg bg-secondary p-1.5 sm:gap-2 sm:rounded-xl sm:p-3">
-              <div className="relative aspect-[240/155] w-2/3 overflow-hidden rounded-md shadow-[inset_0_0_33px_0_rgba(48,48,48,0.25)] sm:rounded-lg">
+            <div className="flex aspect-[8/5] w-full gap-1 overflow-hidden rounded-lg bg-secondary p-1.5 sm:gap-2 sm:rounded-xl sm:p-3">
+              <div className="relative h-full w-2/3 overflow-hidden rounded-md shadow-[inset_0_0_33px_0_rgba(48,48,48,0.25)] sm:rounded-lg">
                 <Image src={DOCK_COLUMN_C.shots[0]} alt="Antigravity IDE screenshot" fill className="object-cover" />
               </div>
-              <div className="flex w-1/3 flex-col gap-1 sm:gap-1.5">
+              <div className="flex h-full w-1/3 flex-col gap-1 sm:gap-1.5">
                 <div className="relative flex-1 overflow-hidden rounded shadow-[inset_0_0_33px_0_rgba(48,48,48,0.25)]">
                   <Image src={DOCK_COLUMN_C.shots[1]} alt="" fill className="object-cover" />
                 </div>
