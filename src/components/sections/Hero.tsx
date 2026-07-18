@@ -45,7 +45,7 @@ const DOCK_COLUMN_A = {
     "/images/dock-icon-23.png",
     "/images/dock-icon-24.png",
     "/images/icon-notion.png",
-    "/images/icon-paper.png",
+    "/images/icon-paper.svg",
   ],
   shot: "/images/dock-shot-79.png",
 };
