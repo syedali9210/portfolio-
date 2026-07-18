@@ -7,7 +7,7 @@ const WORK_EXPERIENCE: ExperienceItemType[] = [
   {
     id: "basenine",
     companyName: "BASENINE",
-    companyLogo: "/images/dock-icon-16.png",
+    companyLogo: "/images/icon-basenine.jpeg",
     companyWebsite: "#",
     positions: [
       {

@@ -43,7 +43,7 @@ const DOCK_COLUMN_A = {
   icons: [
     "/images/dock-icon-16.png",
     "/images/dock-icon-22.png",
-    "/images/icon-basenine.jpeg",
+    "/images/dock-icon-23.png",
     "/images/dock-icon-24.png",
     "/images/icon-notion.png",
     "/images/icon-paper.svg",

@@ -9,11 +9,19 @@ import { ChevronsUpDownIcon } from "@/components/chevrons-up-down-icon";
 const ITEMS = [
   {
     n: "01",
-    text: "I never open Figma first. I start with the problem, sit with it, understand what the user is actually struggling with before a single screen exists. Design without that is just decoration.",
+    text: "It all started when i saw an app banner. What began as making shapes turned into late night detailing over pixels.",
   },
   {
     n: "02",
-    text: "once the problem is clear, I build flows and interfaces around one thing, clarity. Every screen gets stripped down until only what earns its place stays. If it does not help the user move forward, it gets cut, no matter how nice it looks.",
+    text: "In my second year, I realized design was never just Figma or Canva, it was about solving the pain points.",
+  },
+  {
+    n: "03",
+    text: "Today, I solve user problems, build what I design, and almost every idea still begins with pen and paper.",
+  },
+  {
+    n: "04",
+    text: "When I'm not designing, I'm usually making animations in a café with music playing and a cold coffee beside me.",
   },
 ];
 
