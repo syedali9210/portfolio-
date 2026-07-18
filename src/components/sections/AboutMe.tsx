@@ -2,14 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import FadeIn from "@/components/FadeIn";
 import SectionHeading from "@/components/SectionHeading";
 import StickerDrag from "@/components/sticker-drag";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn } from "@/lib/utils";
+import { Tabs, TabsList, TabItem } from "@/components/ui/tabs";
 
-// Photo prints (white-bordered, 488x635) that live in the drag-and-play frame.
+// Photos that live in the drag-and-play frame.
 const STICKER_TABS = [
   {
     value: "cats",
@@ -45,40 +44,14 @@ const STICKER_TABS = [
   },
 ];
 
-// Photos are portrait prints (488x635 source) — keep the ratio at sticker size.
+// Photos are portrait shots (440x586 source) — keep the ratio at sticker size.
 const PHOTO_W = 122;
-const PHOTO_H = 159;
-
-// Timeline measured from the reference clip (motiscope): content appears,
-// the glow blooms with ease-out cubic-bezier(0,0,.58,1) peaking ~0.8s in,
-// breathes for a beat, then items land with a ~96ms stagger.
-const GLOW_EASE: [number, number, number, number] = [0, 0, 0.58, 1];
-const FALL_AT_MS = 1900;
-const STAGGER_S = 0.096;
+const PHOTO_H = 162;
 
 export default function AboutMe() {
   const [activeTab, setActiveTab] = useState(STICKER_TABS[0].value);
   const [spotlight, setSpotlight] = useState<string | null>(null);
   const mounted = useRef(false);
-
-  // "hidden" → (frame scrolls into view) "loading" (photos hover with the
-  // glow) → "landed" (photos fall into the frame and become draggable).
-  const frameRef = useRef<HTMLDivElement>(null);
-  const frameInView = useInView(frameRef, { once: true, margin: "-20% 0px" });
-  const reducedMotion = useReducedMotion();
-  const [fallen, setFallen] = useState(false);
-
-  useEffect(() => {
-    if (!frameInView || fallen) return;
-    const t = setTimeout(() => setFallen(true), FALL_AT_MS);
-    return () => clearTimeout(t);
-  }, [frameInView, fallen]);
-
-  const phase: "hidden" | "loading" | "landed" = !frameInView
-    ? "hidden"
-    : fallen || reducedMotion
-      ? "landed"
-      : "loading";
 
   useEffect(() => {
     mounted.current = true;
@@ -124,15 +97,9 @@ export default function AboutMe() {
       <FadeIn delay={0.05} className="mt-6 px-4 sm:px-6">
         <Tabs value={activeTab} onValueChange={(v) => handleTabChange(v as string)}>
           <div className="screen-line-bottom pb-4">
-            <TabsList className="h-auto w-fit flex-wrap gap-4 bg-transparent p-0">
+            <TabsList className="flex-wrap">
               {STICKER_TABS.map((tab) => (
-                <TabsTrigger
-                  key={tab.value}
-                  value={tab.value}
-                  className="rounded-xl bg-secondary px-4 py-2 text-base font-medium text-muted-foreground data-active:bg-foreground data-active:text-background"
-                >
-                  {tab.label}
-                </TabsTrigger>
+                <TabItem key={tab.value} value={tab.value} label={tab.label} />
               ))}
             </TabsList>
           </div>
@@ -141,59 +108,16 @@ export default function AboutMe() {
 
       {/* Drag and play frame */}
       <FadeIn delay={0.1} className="mt-6 px-4 sm:px-6">
-        <div
-          ref={frameRef}
-          className="relative min-h-[320px] overflow-visible rounded-xl bg-card p-6 sm:min-h-[420px] sm:p-10"
-        >
+        <div className="relative min-h-[320px] overflow-visible rounded-xl bg-card p-6 sm:min-h-[420px] sm:p-10">
           <span className="pointer-events-none absolute left-4 top-3 text-base text-muted-foreground">
             *drag and play
           </span>
 
           <div className="mt-6 flex h-full flex-wrap items-center justify-around gap-6">
-            {STICKER_TABS.map((tab, i) => (
-              <motion.div
-                key={tab.value}
-                initial={{ y: -170, opacity: 0 }}
-                animate={
-                  phase === "hidden"
-                    ? { y: -170, opacity: 0 }
-                    : phase === "loading"
-                      ? { y: -170, opacity: 1 }
-                      : { y: 0, opacity: 1 }
-                }
-                transition={
-                  phase === "landed"
-                    ? {
-                        y: { type: "spring", stiffness: 320, damping: 17, delay: i * STAGGER_S },
-                        opacity: { duration: 0.2 },
-                      }
-                    : { duration: 0.35, ease: GLOW_EASE, delay: i * 0.05 }
-                }
-                className="relative"
-              >
-                {/* Apple Intelligence-style loading glow, blooms while the
-                    photo "loads" and fades as it falls into the frame */}
-                <motion.div
-                  aria-hidden
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: phase === "loading" ? 1 : 0 }}
-                  transition={
-                    phase === "loading"
-                      ? { duration: 0.4, ease: GLOW_EASE, delay: 0.55 + i * 0.05 }
-                      : { duration: 0.45, ease: "easeOut", delay: i * STAGGER_S }
-                  }
-                  className="photo-glow pointer-events-none absolute -inset-2 rounded-2xl"
-                />
-                <div
-                  className={cn(
-                    "transition-[filter,transform] duration-300",
-                    activeTab === tab.value ? "grayscale-0" : "grayscale hover:grayscale-0"
-                  )}
-                  style={{ rotate: `${tab.rotation}deg` }}
-                >
-                  <StickerDrag image={tab.image} imageWidth={PHOTO_W} imageHeight={PHOTO_H} />
-                </div>
-              </motion.div>
+            {STICKER_TABS.map((tab) => (
+              <div key={tab.value} style={{ rotate: `${tab.rotation}deg` }}>
+                <StickerDrag image={tab.image} imageWidth={PHOTO_W} imageHeight={PHOTO_H} />
+              </div>
             ))}
           </div>
         </div>
@@ -223,7 +147,7 @@ export default function AboutMe() {
                   src={spotlightTab.image}
                   alt={spotlightTab.label}
                   width={220}
-                  height={286}
+                  height={293}
                   className="drop-shadow-[0px_13px_14px_rgba(0,0,0,0.3)]"
                 />
               </div>

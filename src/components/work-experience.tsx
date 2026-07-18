@@ -182,12 +182,14 @@ export function ExperiencePositionItem({
                     )}
                   </div>
 
-                  <h4 className="flex-1 font-medium text-balance text-foreground">
-                    {position.title}
-                  </h4>
+                  <div className="flex flex-1 items-center gap-2">
+                    <h4 className="font-medium text-balance text-foreground">
+                      {position.title}
+                    </h4>
 
-                  <div className="shrink-0 text-muted-foreground group-disabled/experience-position:hidden [&_svg]:h-lh [&_svg]:w-4">
-                    <ChevronsUpDownIcon ref={chevronsUpDownIconRef} duration={0.15} />
+                    <div className="shrink-0 text-muted-foreground group-disabled/experience-position:hidden [&_svg]:h-lh [&_svg]:w-4">
+                      <ChevronsUpDownIcon ref={chevronsUpDownIconRef} duration={0.15} />
+                    </div>
                   </div>
                 </div>
 

@@ -6,7 +6,7 @@ import FadeIn from "@/components/FadeIn";
 import PetBuddyGreeting from "@/components/PetBuddyGreeting";
 import ScratchCard from "@/components/ScratchCard";
 import SectionHeading from "@/components/SectionHeading";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabItem, TabPanel } from "@/components/ui/tabs";
 
 const TABS = [
   { value: "blog-space", label: "Blog space" },
@@ -26,20 +26,14 @@ export default function MySpace() {
       <FadeIn delay={0.1} className="mt-6 px-4 sm:px-6">
         <Tabs value={tab} onValueChange={(v) => setTab(v as string)}>
           <div className="screen-line-bottom pb-4">
-            <TabsList className="h-auto w-fit gap-4 bg-transparent p-0">
+            <TabsList>
               {TABS.map((t) => (
-                <TabsTrigger
-                  key={t.value}
-                  value={t.value}
-                  className="rounded-xl bg-secondary px-4 py-2 text-base font-medium text-muted-foreground data-active:bg-foreground data-active:text-background"
-                >
-                  {t.label}
-                </TabsTrigger>
+                <TabItem key={t.value} value={t.value} label={t.label} />
               ))}
             </TabsList>
           </div>
 
-          <TabsContent value="blog-space" className="mt-6">
+          <TabPanel value="blog-space" className="mt-6">
             <p className="text-base leading-relaxed text-muted-foreground">
               From developing my own portfolio to making my own pet buddy like Claude, this idea came to
               my mind while i was glued to my desk while making my portfolio with my earphones on.
@@ -57,9 +51,9 @@ export default function MySpace() {
             <div className="mt-8 flex w-full items-center justify-center rounded-xl bg-card p-6 sm:p-10">
               <PetBuddyGreeting text="Hii! 👋" size={140} />
             </div>
-          </TabsContent>
+          </TabPanel>
 
-          <TabsContent value="archive" className="mt-6">
+          <TabPanel value="archive" className="mt-6">
             <p className="mb-8 text-base leading-relaxed text-muted-foreground">
               Welcome to the space where I keep on experimenting with things, anything and everything
               will be put up in this area :)
@@ -81,7 +75,7 @@ export default function MySpace() {
                 *Scratch the card to reveal it, then hover to see it in action.
               </p>
             </div>
-          </TabsContent>
+          </TabPanel>
         </Tabs>
       </FadeIn>
     </section>

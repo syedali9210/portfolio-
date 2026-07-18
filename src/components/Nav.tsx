@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 // Absolute ("/#hash") rather than bare ("#hash") so these still work when
@@ -51,11 +52,11 @@ export default function Nav() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-background/90 backdrop-blur">
+    <header className="sticky top-0 z-50 w-full">
       <div className="mx-auto flex w-full max-w-[680px] items-center justify-between px-4 py-3 sm:px-6">
-        <a href="/#home" className="text-base text-muted-foreground">
+        <Link href="/#home" className="text-base text-muted-foreground">
           Syed.Ali
-        </a>
+        </Link>
 
         <nav className="flex items-center gap-2 rounded-full p-1">
           <div className="flex items-center gap-6 sm:gap-10">
