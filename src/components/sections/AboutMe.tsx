@@ -108,7 +108,7 @@ export default function AboutMe() {
 
       {/* Drag and play frame */}
       <FadeIn delay={0.1} className="mt-6 px-4 sm:px-6">
-        <div className="relative min-h-[320px] overflow-visible rounded-xl bg-card p-6 sm:min-h-[420px] sm:p-10">
+        <div className="relative min-h-[320px] overflow-visible rounded-xl bg-secondary p-6 sm:min-h-[420px] sm:p-10 dark:bg-card">
           <span className="pointer-events-none absolute left-4 top-3 text-base text-muted-foreground">
             *drag and play
           </span>

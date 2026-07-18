@@ -467,4 +467,12 @@ export const projects: Project[] = [
       ],
     },
   },
+  {
+    slug: "khaata",
+    title: "Khaata",
+    meta: "FinTech, 2026",
+    tag: "FinTech",
+    description: "Your finance, tracked.",
+    gradient: "from-[#1f6f4f] to-[#123a5e]",
+  },
 ];

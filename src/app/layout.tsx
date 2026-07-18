@@ -3,6 +3,7 @@ import { Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import { ThemeProvider } from "next-themes";
 import { Agentation } from "agentation";
+import { Analytics } from "@vercel/analytics/next";
 import SmoothScroll from "@/components/SmoothScroll";
 import ViewportEdgeBlur from "@/components/ViewportEdgeBlur";
 import "./globals.css";
@@ -48,6 +49,7 @@ export default function RootLayout({
         {process.env.NODE_ENV === "development" && (
           <Agentation endpoint="http://localhost:4747" />
         )}
+        <Analytics />
       </body>
     </html>
   );

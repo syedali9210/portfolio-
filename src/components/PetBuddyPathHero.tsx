@@ -22,8 +22,8 @@ const PET_SH = "#b95a3c";
 const PET_SH2 = "#8f4530";
 const PET_OUTLINE = "#ffffff";
 const PET_EYE = "#141414";
-const BG = "var(--color-card)";
-const STROKE = "var(--color-border)";
+const BG = "var(--color-pbh-surface)";
+const STROKE = "var(--color-pbh-stroke)";
 
 const MAIN: [number, number][] = [
   [212.082, 228.432], [359.917, 143.079], [507.753, 228.432], [573.871, 190.258],
