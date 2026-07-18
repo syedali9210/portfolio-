@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { cn } from "@/lib/utils";
 
 export type ScrubberItem = {
   id: string;
@@ -12,8 +11,6 @@ const TICK_COUNT = 32;
 
 export default function Scrubber({ items }: { items: ScrubberItem[] }) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const [isHovering, setIsHovering] = useState(false);
   const trackRef = useRef<HTMLDivElement>(null);
   const draggingRef = useRef(false);
 
@@ -59,7 +56,6 @@ export default function Scrubber({ items }: { items: ScrubberItem[] }) {
 
   function handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
     draggingRef.current = true;
-    setIsDragging(true);
     try {
       trackRef.current?.setPointerCapture(e.pointerId);
     } catch {
@@ -76,7 +72,6 @@ export default function Scrubber({ items }: { items: ScrubberItem[] }) {
 
   function handlePointerUp(e: React.PointerEvent<HTMLDivElement>) {
     draggingRef.current = false;
-    setIsDragging(false);
     try {
       trackRef.current?.releasePointerCapture(e.pointerId);
     } catch {
@@ -85,7 +80,6 @@ export default function Scrubber({ items }: { items: ScrubberItem[] }) {
   }
 
   const playheadPercent = items.length > 1 ? (activeIndex / (items.length - 1)) * 100 : 0;
-  const showLabel = isDragging || isHovering;
 
   return (
     <div className="fixed left-8 top-1/2 z-40 hidden -translate-y-1/2 lg:block">
@@ -96,8 +90,6 @@ export default function Scrubber({ items }: { items: ScrubberItem[] }) {
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
           onPointerCancel={handlePointerUp}
-          onPointerEnter={() => setIsHovering(true)}
-          onPointerLeave={() => setIsHovering(false)}
           role="slider"
           aria-orientation="vertical"
           aria-label="Section navigation"
@@ -106,8 +98,6 @@ export default function Scrubber({ items }: { items: ScrubberItem[] }) {
           aria-valuenow={activeIndex}
           aria-valuetext={active.label}
           tabIndex={0}
-          onFocus={() => setIsHovering(true)}
-          onBlur={() => setIsHovering(false)}
           onKeyDown={(e) => {
             if (e.key === "ArrowDown") goToIndex(Math.min(items.length - 1, activeIndex + 1), "smooth");
             if (e.key === "ArrowUp") goToIndex(Math.max(0, activeIndex - 1), "smooth");
@@ -129,10 +119,7 @@ export default function Scrubber({ items }: { items: ScrubberItem[] }) {
         </div>
 
         <div
-          className={cn(
-            "pointer-events-none absolute left-full ml-3 -translate-y-1/2 whitespace-nowrap rounded-lg border border-border bg-card px-3 py-1.5 font-mono text-[13px] text-muted-foreground shadow-lg transition-opacity duration-200",
-            showLabel ? "opacity-100" : "opacity-0"
-          )}
+          className="pointer-events-none absolute left-full ml-3 -translate-y-1/2 whitespace-nowrap rounded-lg border border-border bg-card px-3 py-1.5 font-mono text-[13px] text-muted-foreground shadow-lg transition-[top] duration-300 ease-out"
           style={{ top: `calc(12px + (100% - 24px) * ${playheadPercent / 100})` }}
         >
           {active.label}

@@ -44,6 +44,7 @@
   --color-line: var(--line);
   --color-pbh-stroke: var(--pbh-stroke);
   --color-pbh-surface: var(--pbh-surface);
+  --color-dock-tile: var(--dock-tile);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -130,6 +131,9 @@
      stroke + a faint off-white surface instead of reusing those tokens. */
   --pbh-stroke: oklch(0.75 0 0);
   --pbh-surface: oklch(0.96 0 0);
+  /* Hero dock icon tiles: a dark charcoal square (not pure black) reads
+     better against the light-mode secondary row than jet black would. */
+  --dock-tile: #262626;
   --surface-1: #FAFAFA;
   --surface-2: #FCFCFC;
   --surface-3: #FFFFFF;
@@ -186,6 +190,7 @@
   --label-gradient-to: #6b6b6b;
   --pbh-stroke: var(--border);
   --pbh-surface: var(--card);
+  --dock-tile: #000000;
   --surface-1: #171717;
   --surface-2: #1E1E1E;
   --surface-3: #252525;

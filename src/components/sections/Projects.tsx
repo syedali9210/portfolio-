@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { motion } from "motion/react";
+import { Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import FadeIn from "@/components/FadeIn";
 import SectionHeading from "@/components/SectionHeading";
@@ -13,7 +14,10 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 const LAYOUT_TRANSITION = { duration: 0.45, ease: EASE };
 
 export default function Projects() {
-  const [activeSlug, setActiveSlug] = useState<string | null>(null);
+  // One project is always morphed into the detail view; clicking a
+  // different title morphs that one and rests the previously-active one.
+  // Every title stays lined up and visible regardless of which is active.
+  const [activeSlug, setActiveSlug] = useState<string>(projects[0].slug);
 
   return (
     <section
@@ -26,30 +30,14 @@ export default function Projects() {
         <div className="flex flex-col">
           {projects.map((project) => {
             const isActive = activeSlug === project.slug;
-            const isCollapsed = activeSlug !== null && !isActive;
 
             return (
-              <motion.div
-                key={project.slug}
-                layout
-                transition={LAYOUT_TRANSITION}
-                className={cn(
-                  "overflow-hidden",
-                  isCollapsed && "pointer-events-none h-0 opacity-0"
-                )}
-              >
+              <motion.div key={project.slug} layout transition={LAYOUT_TRANSITION}>
                 {isActive ? (
                   <motion.div layout="position" transition={LAYOUT_TRANSITION} className="flex flex-col gap-6 py-3">
-                    <button
-                      type="button"
-                      onClick={() => setActiveSlug(null)}
-                      className="flex w-fit items-center gap-2 text-xl font-medium text-foreground transition-opacity hover:opacity-70"
-                    >
-                      <motion.span layout="position" transition={LAYOUT_TRANSITION}>
-                        {project.title}
-                      </motion.span>
-                      <span className="text-muted-foreground">&mdash;</span>
-                    </button>
+                    <motion.p layout="position" transition={LAYOUT_TRANSITION} className="w-fit text-xl font-medium text-foreground">
+                      {project.title}
+                    </motion.p>
 
                     <motion.div
                       initial={{ opacity: 0, y: 8 }}
@@ -58,14 +46,23 @@ export default function Projects() {
                       className="flex flex-col gap-6"
                     >
                       {project.image && (
-                        <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-[#1f1f1f]">
+                        <div className="group/hero relative aspect-video w-full overflow-hidden rounded-xl bg-[#1f1f1f]">
                           <Image
                             src={project.image}
                             alt={`${project.title} screenshot`}
                             fill
                             sizes="(min-width: 640px) 680px, 100vw"
-                            className="object-cover object-top"
+                            className={cn(
+                              "object-cover object-top",
+                              project.comingSoon && "object-contain p-8 blur-md"
+                            )}
                           />
+                          {project.comingSoon && (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-background/60 opacity-0 transition-opacity duration-300 group-hover/hero:opacity-100">
+                              <Lock className="size-6 text-foreground" />
+                              <p className="text-sm font-medium text-foreground">Coming soon</p>
+                            </div>
+                          )}
                         </div>
                       )}
 

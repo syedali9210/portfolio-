@@ -41,6 +41,8 @@ export type Project = {
   gradient: string;
   image?: string;
   caseStudy?: CaseStudy;
+  /** Not shippable yet — hero image stays blurred, with a "Coming soon" lock overlay on hover. */
+  comingSoon?: boolean;
 };
 
 export const projects: Project[] = [
@@ -474,5 +476,7 @@ export const projects: Project[] = [
     tag: "FinTech",
     description: "Your finance, tracked.",
     gradient: "from-[#1f6f4f] to-[#123a5e]",
+    image: "/images/case-studies/khaata/khaata-app.png",
+    comingSoon: true,
   },
 ];

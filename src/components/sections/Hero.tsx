@@ -61,7 +61,7 @@ function DockIconRow({ icons }: { icons: string[] }) {
       {icons.map((src, i) => (
         <div
           key={i}
-          className="relative flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-md bg-neutral-800 p-1.5 shadow-[inset_0_0_20px_0_rgba(48,48,48,0.25)] sm:size-13 sm:rounded-lg sm:p-2.5 dark:bg-black"
+          className="relative flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-md bg-dock-tile p-1.5 shadow-[inset_0_0_20px_0_rgba(48,48,48,0.25)] sm:size-13 sm:rounded-lg sm:p-2.5"
         >
           <Image src={src} alt="" width={24} height={24} className="size-full object-contain" />
         </div>
