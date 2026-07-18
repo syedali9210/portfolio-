@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { Briefcase, MapPin, Phone, Mail, Clock, type LucideIcon } from "lucide-react";
 import FadeIn from "@/components/FadeIn";
 import LiveClock from "@/components/LiveClock";
 import PetBuddyGreeting from "@/components/PetBuddyGreeting";
@@ -16,22 +17,22 @@ const DESIGNATIONS = [
 ];
 
 const INFO_ITEMS: {
-  icon: string;
+  icon: LucideIcon;
   label: string;
   href?: string;
   full?: boolean;
   copyText?: string;
 }[] = [
-  { icon: "/images/profile-icon-role.svg", label: "Design Engineer", href: undefined, full: true },
-  { icon: "/images/profile-icon-location.svg", label: "Bengaluru, India", href: undefined },
+  { icon: Briefcase, label: "Design Engineer", href: undefined, full: true },
+  { icon: MapPin, label: "Bengaluru, India", href: undefined },
   {
-    icon: "/images/profile-icon-phone.svg",
+    icon: Phone,
     label: "+91 7765863700",
     href: "tel:+917765863700",
     copyText: "+91 7765863700",
   },
   {
-    icon: "/images/profile-icon-email.svg",
+    icon: Mail,
     label: "syedwali9286@gmail.com",
     href: "mailto:syedwali9286@gmail.com",
     copyText: "syedwali9286@gmail.com",
@@ -42,7 +43,7 @@ const DOCK_COLUMN_A = {
   icons: [
     "/images/dock-icon-16.png",
     "/images/dock-icon-22.png",
-    "/images/dock-icon-23.png",
+    "/images/icon-basenine.jpeg",
     "/images/dock-icon-24.png",
     "/images/icon-notion.png",
     "/images/icon-paper.svg",
@@ -111,9 +112,6 @@ export default function Hero() {
               </div>
 
               <div className="ml-auto flex items-center gap-2">
-                <div className="flex size-6 shrink-0 items-center justify-center rounded-md bg-secondary">
-                  <Image src="/images/dock-icon-16.png" alt="" width={16} height={16} className="rounded-sm" />
-                </div>
                 <ThemeSwitcher />
               </div>
             </div>
@@ -125,7 +123,7 @@ export default function Hero() {
                   className={`flex items-center gap-4 ${item.full ? "sm:col-span-2" : ""}`}
                 >
                   <div className="flex size-6 shrink-0 items-center justify-center rounded-md bg-secondary">
-                    <Image src={item.icon} alt="" width={16} height={16} />
+                    <item.icon size={16} className="text-muted-foreground" />
                   </div>
                   {item.href ? (
                     <a href={item.href} className="text-base text-foreground hover:underline">
@@ -146,7 +144,7 @@ export default function Hero() {
               ))}
               <div className="flex items-center gap-4">
                 <div className="flex size-6 shrink-0 items-center justify-center rounded-md bg-secondary">
-                  <Image src="/images/profile-icon-clock.svg" alt="" width={16} height={16} />
+                  <Clock size={16} className="text-muted-foreground" />
                 </div>
                 <LiveClock />
               </div>
