@@ -48,7 +48,9 @@ export default function YappingAccordion() {
         aria-expanded={open}
         className="screen-line-top screen-line-bottom flex w-full items-center gap-2 px-4 py-2 text-left sm:px-6"
       >
-        <p className="text-base text-muted-foreground">*Yapping each aspect</p>
+        <p className="text-base text-muted-foreground">
+          {open ? "*yapp a bit more" : "no yapping"}
+        </p>
         <ChevronsUpDownIcon
           ref={chevronsRef}
           duration={0.2}

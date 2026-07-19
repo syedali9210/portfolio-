@@ -13,7 +13,7 @@ const DESIGNATIONS = [
   "Design engineer",
   "The guy",
   "Pixel perfectionist",
-  "can work without my cold coffee",
+  "cant work without my cold coffee",
 ];
 
 const INFO_ITEMS: {

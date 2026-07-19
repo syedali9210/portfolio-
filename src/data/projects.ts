@@ -47,188 +47,6 @@ export type Project = {
 
 export const projects: Project[] = [
   {
-    slug: "airtribe",
-    title: "Airtribe - AI Learning Experience",
-    meta: "EduTech, 2025",
-    tag: "Product Design",
-    description:
-      "Designed an AI experience for the users to ease their learning experience through out the site.",
-    gradient: "from-[#123600] to-[#005266]",
-    image: "/images/case-studies/airtribe/frame-7.png",
-    caseStudy: {
-      overview: [
-        "An AI-powered redesign of Airtribe's learning platform focused on helping learners navigate courses more confidently, reduce friction, and receive contextual AI assistance throughout their learning journey.",
-        "Airtribe is a cohort-based edtech platform where professionals learn through live sessions, mentorship, assignments, and community-driven programs.",
-      ],
-      challenge: [
-        "Although Airtribe offered quality learning content, the overall experience made it difficult for learners to understand where they were, what to do next, and how to make the most of the platform.",
-        "My goal was to redesign the learning experience while exploring how AI could provide contextual assistance without overwhelming users.",
-      ],
-      researchTitle: "Breaking Down the Problem",
-      researchIntro: [
-        "To dig deeper, I broke the problem down into four areas: how learners moved through their course journey, how they navigated the platform, how information was prioritized, and how engaged they felt along the way.",
-        "Each area became its own lens for uncovering exactly where the friction was coming from.",
-      ],
-      researchNotes: [
-        {
-          title: "Learning Journey",
-          points: [
-            "Users struggled to understand the overall course flow.",
-            "Progress wasn't clearly communicated.",
-          ],
-        },
-        {
-          title: "Navigation",
-          points: [
-            "Finding recordings, assignments, and resources required unnecessary effort.",
-            "Core sections felt disconnected.",
-          ],
-        },
-        {
-          title: "Information Hierarchy",
-          points: [
-            "Important actions competed for attention.",
-            "Users had difficulty identifying priorities.",
-          ],
-        },
-        {
-          title: "Engagement",
-          points: [
-            "The platform lacked proactive guidance.",
-            "Learners often had to search for information instead of receiving timely support.",
-          ],
-        },
-      ],
-      findingsTitle: "Research & Findings",
-      findingsIntro: [
-        "After reviewing the existing platform, studying the user journey, and comparing similar learning platforms, I found that most friction didn't come from the content itself — it came from how learners interacted with the platform.",
-        "Users weren't looking for more features. They wanted a learning experience that felt structured, guided, and easy to navigate.",
-        "The research highlighted four recurring themes that became the foundation of the redesign.",
-      ],
-      findings: [
-        {
-          title: "Learning Flow",
-          quotes: [
-            "Not sure where to start.",
-            "The course journey feels confusing.",
-            "I don't know what's coming next.",
-          ],
-        },
-        {
-          title: "Navigation",
-          quotes: [
-            "Finding recordings takes too many clicks.",
-            "I keep jumping between different sections.",
-            "Assignments and resources feel disconnected.",
-          ],
-        },
-        {
-          title: "Info. Hierarchy",
-          quotes: ["Everything feels the same.", "Not sure what to do.", "Easy to miss updates."],
-        },
-        {
-          title: "AI",
-          quotes: [
-            "Need instant answers.",
-            "Resources are hard to find.",
-            "Need tailored recommendations.",
-          ],
-        },
-      ],
-      insightsTitle: "Insights",
-      insightsIntro: [
-        "The research uncovered recurring patterns in user behavior that revealed where learners experienced the most friction. These insights guided the redesign and shaped every feature that followed.",
-      ],
-      insights: [
-        {
-          title: "Reduce cognitive load",
-          description:
-            "Learning should feel effortless. Surface only what's relevant instead of making learners process everything at once.",
-        },
-        {
-          title: "Guide, don't overwhelm",
-          description:
-            "Instead of presenting every resource upfront, provide contextual guidance and clear next steps based on where the learner is in their journey.",
-        },
-        {
-          title: "Context beats search",
-          description:
-            "Learners shouldn't have to remember where information lives. Answers should appear within the context of the task they're already doing.",
-        },
-        {
-          title: "AI should augment, not replace",
-          description:
-            "AI is most valuable when it supports mentors and learners with summaries, recommendations, and guidance — not when it attempts to replace human teaching.",
-        },
-      ],
-      solutionsTitle: "Solutions",
-      solutionsIntro: ["The redesign focused on solving the most critical pain points uncovered during research."],
-      solutions: [
-        {
-          label: "AI Learning Companion",
-          leftText:
-            "Learners spent too much time searching for answers across recordings, discussions, and resources.",
-          rightTitle: "Why this solution",
-          rightText:
-            "Redesigned the hero around a stronger value proposition with supporting visuals and clear CTAs.",
-          images: [{ src: "/images/case-studies/airtribe/cs-image-12.png", alt: "AI learning companion" }],
-          impactTitle: "Impact",
-          impactText: "Faster access to information, reduced friction, and a more guided learning experience.",
-        },
-        {
-          label: "Redesigned Dashboard",
-          leftText: "Users couldn't quickly understand their progress or what required attention.",
-          rightText: "Highlights priorities, upcoming sessions, and progress in a single, easy-to-scan view.",
-          images: [
-            { src: "/images/case-studies/airtribe/cs-screenshot-before.png", alt: "Before" },
-            { src: "/images/case-studies/airtribe/cs-image-5-after.png", alt: "After" },
-          ],
-          impactTitle: "Why it works",
-          impactText: "Learners can see exactly what needs attention at a glance, without digging through multiple screens.",
-        },
-        {
-          label: "Simplified Navigation",
-          leftText: "Finding recordings, assignments, and resources required unnecessary effort.",
-          rightText: "Users can reach core sections faster with a more predictable navigation experience.",
-          images: [
-            { src: "/images/case-studies/airtribe/cs-ai-curated-section.png", alt: "AI curated section" },
-            { src: "/images/case-studies/airtribe/cs-quick-notes.png", alt: "Quick notes" },
-            { src: "/images/case-studies/airtribe/cs-container.png", alt: "Workspace container" },
-            { src: "/images/case-studies/airtribe/cs-projects-mock.png", alt: "Projects" },
-          ],
-        },
-        {
-          label: "Improved Information Hierarchy",
-          leftText: "Important information competed equally for attention.",
-          rightTitle: "Why it works",
-          rightText: "Reorganized content using stronger hierarchy, spacing, and visual emphasis.",
-          images: [
-            { src: "/images/case-studies/airtribe/cs-image-6.png" },
-            { src: "/images/case-studies/airtribe/cs-image-12.png" },
-            { src: "/images/case-studies/airtribe/cs-image-7.png" },
-          ],
-          impactTitle: "Impact",
-          impactText: "Users can identify priorities at a glance and make decisions more confidently.",
-        },
-      ],
-      outcomesTitle: "Outcomes",
-      outcomesIntro: [
-        "The redesign focused on creating a clearer and more guided learning experience by simplifying navigation, improving information hierarchy, and introducing contextual AI support.",
-      ],
-      closingNote: ["You've officially graduated from this case study.", "Time to enroll in the next one."],
-      outcomes: [
-        { label: "Clear Learning Journey", metric: "↓ Cognitive Load (Qualitative)" },
-        { label: "Faster Navigation", metric: "3 → 1 Clicks" },
-        { label: "Contextual AI Support", metric: "24/7 Assistance" },
-        { label: "Better Information Hierarchy", metric: "↑ Task Visibility" },
-      ],
-      learnedTitle: "What I Learned",
-      learned: [
-        "This project helped me think beyond just designing screens. I learned how small UX decisions can shape the entire learning experience and how AI should solve real user problems instead of being added just because it's trending.",
-      ],
-    },
-  },
-  {
     slug: "kodex",
     title: "Kodex",
     meta: "BASENINE, 2026",
@@ -466,6 +284,188 @@ export const projects: Project[] = [
       learnedTitle: "What I Learned",
       learned: [
         "Designing for cybersecurity taught me that users don't need every technical detail upfront — they need clarity, confidence, and a clear understanding of why the product matters. This project strengthened my ability to simplify complex topics while designing experiences that educate, build trust, and encourage action.",
+      ],
+    },
+  },
+  {
+    slug: "airtribe",
+    title: "Airtribe - AI Learning Experience",
+    meta: "EduTech, 2026",
+    tag: "Product Design",
+    description:
+      "Designed an AI experience for the users to ease their learning experience through out the site.",
+    gradient: "from-[#123600] to-[#005266]",
+    image: "/images/case-studies/airtribe/frame-7.png",
+    caseStudy: {
+      overview: [
+        "An AI-powered redesign of Airtribe's learning platform focused on helping learners navigate courses more confidently, reduce friction, and receive contextual AI assistance throughout their learning journey.",
+        "Airtribe is a cohort-based edtech platform where professionals learn through live sessions, mentorship, assignments, and community-driven programs.",
+      ],
+      challenge: [
+        "Although Airtribe offered quality learning content, the overall experience made it difficult for learners to understand where they were, what to do next, and how to make the most of the platform.",
+        "My goal was to redesign the learning experience while exploring how AI could provide contextual assistance without overwhelming users.",
+      ],
+      researchTitle: "Breaking Down the Problem",
+      researchIntro: [
+        "To dig deeper, I broke the problem down into four areas: how learners moved through their course journey, how they navigated the platform, how information was prioritized, and how engaged they felt along the way.",
+        "Each area became its own lens for uncovering exactly where the friction was coming from.",
+      ],
+      researchNotes: [
+        {
+          title: "Learning Journey",
+          points: [
+            "Users struggled to understand the overall course flow.",
+            "Progress wasn't clearly communicated.",
+          ],
+        },
+        {
+          title: "Navigation",
+          points: [
+            "Finding recordings, assignments, and resources required unnecessary effort.",
+            "Core sections felt disconnected.",
+          ],
+        },
+        {
+          title: "Information Hierarchy",
+          points: [
+            "Important actions competed for attention.",
+            "Users had difficulty identifying priorities.",
+          ],
+        },
+        {
+          title: "Engagement",
+          points: [
+            "The platform lacked proactive guidance.",
+            "Learners often had to search for information instead of receiving timely support.",
+          ],
+        },
+      ],
+      findingsTitle: "Research & Findings",
+      findingsIntro: [
+        "After reviewing the existing platform, studying the user journey, and comparing similar learning platforms, I found that most friction didn't come from the content itself — it came from how learners interacted with the platform.",
+        "Users weren't looking for more features. They wanted a learning experience that felt structured, guided, and easy to navigate.",
+        "The research highlighted four recurring themes that became the foundation of the redesign.",
+      ],
+      findings: [
+        {
+          title: "Learning Flow",
+          quotes: [
+            "Not sure where to start.",
+            "The course journey feels confusing.",
+            "I don't know what's coming next.",
+          ],
+        },
+        {
+          title: "Navigation",
+          quotes: [
+            "Finding recordings takes too many clicks.",
+            "I keep jumping between different sections.",
+            "Assignments and resources feel disconnected.",
+          ],
+        },
+        {
+          title: "Info. Hierarchy",
+          quotes: ["Everything feels the same.", "Not sure what to do.", "Easy to miss updates."],
+        },
+        {
+          title: "AI",
+          quotes: [
+            "Need instant answers.",
+            "Resources are hard to find.",
+            "Need tailored recommendations.",
+          ],
+        },
+      ],
+      insightsTitle: "Insights",
+      insightsIntro: [
+        "The research uncovered recurring patterns in user behavior that revealed where learners experienced the most friction. These insights guided the redesign and shaped every feature that followed.",
+      ],
+      insights: [
+        {
+          title: "Reduce cognitive load",
+          description:
+            "Learning should feel effortless. Surface only what's relevant instead of making learners process everything at once.",
+        },
+        {
+          title: "Guide, don't overwhelm",
+          description:
+            "Instead of presenting every resource upfront, provide contextual guidance and clear next steps based on where the learner is in their journey.",
+        },
+        {
+          title: "Context beats search",
+          description:
+            "Learners shouldn't have to remember where information lives. Answers should appear within the context of the task they're already doing.",
+        },
+        {
+          title: "AI should augment, not replace",
+          description:
+            "AI is most valuable when it supports mentors and learners with summaries, recommendations, and guidance — not when it attempts to replace human teaching.",
+        },
+      ],
+      solutionsTitle: "Solutions",
+      solutionsIntro: ["The redesign focused on solving the most critical pain points uncovered during research."],
+      solutions: [
+        {
+          label: "AI Learning Companion",
+          leftText:
+            "Learners spent too much time searching for answers across recordings, discussions, and resources.",
+          rightTitle: "Why this solution",
+          rightText:
+            "Redesigned the hero around a stronger value proposition with supporting visuals and clear CTAs.",
+          images: [{ src: "/images/case-studies/airtribe/cs-image-12.png", alt: "AI learning companion" }],
+          impactTitle: "Impact",
+          impactText: "Faster access to information, reduced friction, and a more guided learning experience.",
+        },
+        {
+          label: "Redesigned Dashboard",
+          leftText: "Users couldn't quickly understand their progress or what required attention.",
+          rightText: "Highlights priorities, upcoming sessions, and progress in a single, easy-to-scan view.",
+          images: [
+            { src: "/images/case-studies/airtribe/cs-screenshot-before.png", alt: "Before" },
+            { src: "/images/case-studies/airtribe/cs-image-5-after.png", alt: "After" },
+          ],
+          impactTitle: "Why it works",
+          impactText: "Learners can see exactly what needs attention at a glance, without digging through multiple screens.",
+        },
+        {
+          label: "Simplified Navigation",
+          leftText: "Finding recordings, assignments, and resources required unnecessary effort.",
+          rightText: "Users can reach core sections faster with a more predictable navigation experience.",
+          images: [
+            { src: "/images/case-studies/airtribe/cs-ai-curated-section.png", alt: "AI curated section" },
+            { src: "/images/case-studies/airtribe/cs-quick-notes.png", alt: "Quick notes" },
+            { src: "/images/case-studies/airtribe/cs-container.png", alt: "Workspace container" },
+            { src: "/images/case-studies/airtribe/cs-projects-mock.png", alt: "Projects" },
+          ],
+        },
+        {
+          label: "Improved Information Hierarchy",
+          leftText: "Important information competed equally for attention.",
+          rightTitle: "Why it works",
+          rightText: "Reorganized content using stronger hierarchy, spacing, and visual emphasis.",
+          images: [
+            { src: "/images/case-studies/airtribe/cs-image-6.png" },
+            { src: "/images/case-studies/airtribe/cs-image-12.png" },
+            { src: "/images/case-studies/airtribe/cs-image-7.png" },
+          ],
+          impactTitle: "Impact",
+          impactText: "Users can identify priorities at a glance and make decisions more confidently.",
+        },
+      ],
+      outcomesTitle: "Outcomes",
+      outcomesIntro: [
+        "The redesign focused on creating a clearer and more guided learning experience by simplifying navigation, improving information hierarchy, and introducing contextual AI support.",
+      ],
+      closingNote: ["You've officially graduated from this case study.", "Time to enroll in the next one."],
+      outcomes: [
+        { label: "Clear Learning Journey", metric: "↓ Cognitive Load (Qualitative)" },
+        { label: "Faster Navigation", metric: "3 → 1 Clicks" },
+        { label: "Contextual AI Support", metric: "24/7 Assistance" },
+        { label: "Better Information Hierarchy", metric: "↑ Task Visibility" },
+      ],
+      learnedTitle: "What I Learned",
+      learned: [
+        "This project helped me think beyond just designing screens. I learned how small UX decisions can shape the entire learning experience and how AI should solve real user problems instead of being added just because it's trending.",
       ],
     },
   },
