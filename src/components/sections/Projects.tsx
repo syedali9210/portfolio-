@@ -8,10 +8,40 @@ import { Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import FadeIn from "@/components/FadeIn";
 import SectionHeading from "@/components/SectionHeading";
+import { spring } from "@/lib/springs";
 import { projects } from "@/data/projects";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 const LAYOUT_TRANSITION = { duration: 0.45, ease: EASE };
+
+// Desktop-only: a "Coming soon" pill that tracks the cursor while hovering
+// the blurred hero image, instead of a fixed centered overlay.
+function ComingSoonCursorTag() {
+  const [pos, setPos] = useState({ x: 0, y: 0 });
+  const [hovering, setHovering] = useState(false);
+
+  return (
+    <div
+      className="absolute inset-0 z-10 hidden sm:block"
+      onMouseMove={(e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        setPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+      }}
+      onMouseEnter={() => setHovering(true)}
+      onMouseLeave={() => setHovering(false)}
+    >
+      <motion.div
+        className="pointer-events-none absolute z-10 flex items-center gap-1.5 rounded-full bg-background px-3 py-1.5 text-sm font-medium whitespace-nowrap text-foreground shadow-lg"
+        animate={{ left: pos.x, top: pos.y, opacity: hovering ? 1 : 0 }}
+        transition={spring.fast}
+        style={{ x: "-50%", y: "-140%" }}
+      >
+        <Lock className="size-3.5" />
+        Coming soon
+      </motion.div>
+    </div>
+  );
+}
 
 export default function Projects() {
   // One project is always morphed into the detail view; clicking a
@@ -57,12 +87,7 @@ export default function Projects() {
                               project.comingSoon && "object-contain p-8 blur-md"
                             )}
                           />
-                          {project.comingSoon && (
-                            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-background/60 opacity-0 transition-opacity duration-300 group-hover/hero:opacity-100">
-                              <Lock className="size-6 text-foreground" />
-                              <p className="text-sm font-medium text-foreground">Coming soon</p>
-                            </div>
-                          )}
+                          {project.comingSoon && <ComingSoonCursorTag />}
                         </div>
                       )}
 
@@ -80,6 +105,13 @@ export default function Projects() {
                         >
                           View Case Study
                         </Link>
+                      )}
+
+                      {project.comingSoon && (
+                        <span className="flex w-fit items-center gap-1.5 rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background sm:hidden">
+                          <Lock className="size-3.5" />
+                          Coming soon
+                        </span>
                       )}
                     </motion.div>
                   </motion.div>

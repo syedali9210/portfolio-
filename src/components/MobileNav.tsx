@@ -25,7 +25,7 @@ export default function MobileNav() {
             document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
           }}
         >
-          <TabsList aria-label="Section navigation">
+          <TabsList aria-label="Section navigation" className="gap-2">
             {NAV_ITEMS.map((item) => (
               <TabItem
                 key={item.id}
