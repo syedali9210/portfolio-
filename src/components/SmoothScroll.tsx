@@ -13,6 +13,11 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const lenis = new Lenis({
+      // `<html>` is pinned to 100% viewport height (see layout.tsx), so its
+      // box never resizes as content grows — Lenis's default ResizeObserver
+      // target would never fire and the scroll limit would go stale, capping
+      // scroll short of the real bottom. `<body>` actually grows with content.
+      content: document.body,
       duration: 1.1,
       easing: SCROLL_EASE,
     });
