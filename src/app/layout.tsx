@@ -4,6 +4,7 @@ import localFont from "next/font/local";
 import { ThemeProvider } from "next-themes";
 import { Agentation } from "agentation";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import SmoothScroll from "@/components/SmoothScroll";
 import ViewportEdgeBlur from "@/components/ViewportEdgeBlur";
 import "./globals.css";
@@ -63,6 +64,7 @@ export default function RootLayout({
           <Agentation endpoint="http://localhost:4747" />
         )}
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
