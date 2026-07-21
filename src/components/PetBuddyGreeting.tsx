@@ -3,7 +3,7 @@
 import Script from "next/script";
 
 // The pet-buddy-greeting custom element (same character/rig as the maze
-// hero, walking-in-to-say-hi variant instead of the path-walk) is a
+// hero, idling-by-the-sign variant instead of the path-walk) is a
 // self-contained vanilla web component — registering it via customElements
 // isn't something a React component tree can do declaratively, so it's
 // loaded as a plain script and used as a native custom element.
@@ -20,7 +20,6 @@ declare module "react" {
         text?: string;
         size?: string;
         autoplay?: string;
-        loop?: string;
       };
     }
   }
@@ -29,25 +28,18 @@ declare module "react" {
 interface PetBuddyGreetingProps {
   text?: string;
   size?: number;
-  loop?: number;
   className?: string;
 }
 
 export default function PetBuddyGreeting({
   text = "Hii! 👋",
   size = 120,
-  loop = 5,
   className,
 }: PetBuddyGreetingProps) {
   return (
     <>
       <Script src="/scripts/pet-buddy.js" strategy="afterInteractive" />
-      <pet-buddy-greeting
-        text={text}
-        size={String(size)}
-        loop={String(loop)}
-        className={className}
-      />
+      <pet-buddy-greeting text={text} size={String(size)} className={className} />
     </>
   );
 }

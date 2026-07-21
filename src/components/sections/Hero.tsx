@@ -181,7 +181,7 @@ export default function Hero() {
                 </div>
                 <div className="hidden w-24 shrink-0 flex-col gap-3 sm:flex">
                   <div className="flex min-h-[100px] flex-1 items-center justify-center overflow-hidden rounded-md bg-secondary shadow-[inset_0_0_33px_0_rgba(48,48,48,0.25)]">
-                    <PetBuddyGreeting text="Hii!" size={48} loop={4} />
+                    <PetBuddyGreeting text="Hii!" size={48} />
                   </div>
                   <div className="flex-1 rounded-md bg-secondary shadow-[inset_0_0_33px_0_rgba(48,48,48,0.25)]" />
                 </div>
