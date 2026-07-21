@@ -10,12 +10,17 @@ import ViewportEdgeBlur from "@/components/ViewportEdgeBlur";
 import "./globals.css";
 
 const segoeUI = localFont({
+  // Subsetted to the Latin + punctuation/arrow glyphs actually used on the
+  // site (see scripts this was generated with in the PR) and converted to
+  // woff2 — the original OTFs were full multi-script system font dumps
+  // (~900KB each, ~4.2MB total) that Next preloads on every page load
+  // regardless of which glyphs are ever painted; this subset is ~20KB each.
   src: [
-    { path: "./fonts/segoe-ui-light.otf", weight: "300", style: "normal" },
-    { path: "./fonts/segoe-ui-regular.otf", weight: "400", style: "normal" },
-    { path: "./fonts/segoe-ui-italic.otf", weight: "400", style: "italic" },
-    { path: "./fonts/segoe-ui-semibold.otf", weight: "600", style: "normal" },
-    { path: "./fonts/segoe-ui-bold.otf", weight: "700", style: "normal" },
+    { path: "./fonts/segoe-ui-light.woff2", weight: "300", style: "normal" },
+    { path: "./fonts/segoe-ui-regular.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/segoe-ui-italic.woff2", weight: "400", style: "italic" },
+    { path: "./fonts/segoe-ui-semibold.woff2", weight: "600", style: "normal" },
+    { path: "./fonts/segoe-ui-bold.woff2", weight: "700", style: "normal" },
   ],
   variable: "--font-sans",
 });
