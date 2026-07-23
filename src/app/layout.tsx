@@ -6,6 +6,7 @@ import { Agentation } from "agentation";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import SmoothScroll from "@/components/SmoothScroll";
+import PageTransition from "@/components/PageTransition";
 import ViewportEdgeBlur from "@/components/ViewportEdgeBlur";
 import "./globals.css";
 
@@ -63,7 +64,9 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <ThemeProvider attribute="class" defaultTheme="dark" disableTransitionOnChange>
           <ViewportEdgeBlur />
-          <SmoothScroll>{children}</SmoothScroll>
+          <SmoothScroll>
+            <PageTransition>{children}</PageTransition>
+          </SmoothScroll>
         </ThemeProvider>
         {process.env.NODE_ENV === "development" && (
           <Agentation endpoint="http://localhost:4747" />
