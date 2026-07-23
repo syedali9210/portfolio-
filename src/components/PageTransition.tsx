@@ -1,5 +1,6 @@
 "use client";
 
+import { useLayoutEffect } from "react";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 
@@ -12,18 +13,23 @@ import { AnimatePresence, motion } from "motion/react";
 export default function PageTransition({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
+  // The new page can be much shorter than whatever you were scrolled to on
+  // the old one — mounting it without resetting scroll leaves the viewport
+  // parked past all of its content. Reset synchronously, before paint, on
+  // every pathname change rather than off AnimatePresence's onExitComplete:
+  // with mode="wait" that fired at the instant the old tree had fully
+  // unmounted and the new one hadn't mounted yet, i.e. while the screen had
+  // nothing in it but the near-black page background — worse, that gap could
+  // stretch for a while when the incoming page (Home) does heavy synchronous
+  // mount work, which read as the whole screen going black. popLayout below
+  // keeps the outgoing page mounted (absolutely positioned) while the new
+  // one mounts immediately, so there's never an empty-DOM moment.
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
   return (
-    <AnimatePresence
-      mode="wait"
-      initial={false}
-      // The new page can be much shorter than whatever you were scrolled to
-      // on the old one (e.g. mid-scroll on the home page, then switching to
-      // a short page) — mounting it without resetting scroll leaves the
-      // viewport parked past all of its content, which just reads as a
-      // blank/broken page. Reset right as the old page finishes exiting,
-      // before the new one mounts, so there's no visible snap mid-fade.
-      onExitComplete={() => window.scrollTo(0, 0)}
-    >
+    <AnimatePresence mode="popLayout" initial={false}>
       <motion.div
         key={pathname}
         initial={{ opacity: 0, y: 16 }}
