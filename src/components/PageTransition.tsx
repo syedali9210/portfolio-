@@ -13,7 +13,17 @@ export default function PageTransition({ children }: { children: React.ReactNode
   const pathname = usePathname();
 
   return (
-    <AnimatePresence mode="wait" initial={false}>
+    <AnimatePresence
+      mode="wait"
+      initial={false}
+      // The new page can be much shorter than whatever you were scrolled to
+      // on the old one (e.g. mid-scroll on the home page, then switching to
+      // a short page) — mounting it without resetting scroll leaves the
+      // viewport parked past all of its content, which just reads as a
+      // blank/broken page. Reset right as the old page finishes exiting,
+      // before the new one mounts, so there's no visible snap mid-fade.
+      onExitComplete={() => window.scrollTo(0, 0)}
+    >
       <motion.div
         key={pathname}
         initial={{ opacity: 0, y: 16 }}

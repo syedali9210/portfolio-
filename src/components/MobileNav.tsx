@@ -1,22 +1,45 @@
 "use client";
 
-import ScrubberTabBar from "@/components/ScrubberTabBar";
-import PageSwitchTab from "@/components/PageSwitchTab";
+import { Layers, Rocket, User, Mail } from "lucide-react";
+import { Tabs, TabsList, TabItem } from "@/components/ui/tabs";
+import { Elevated } from "@/lib/elevated";
 import { useActiveSection } from "@/hooks/use-active-section";
 import { NAV_ITEMS } from "@/components/Nav";
+import PageSwitchTab from "@/components/PageSwitchTab";
+
+const ICONS = {
+  projects: Layers,
+  "my-space": Rocket,
+  "about-me": User,
+  contact: Mail,
+} as const;
 
 export default function MobileNav() {
-  const activeId = useActiveSection(NAV_ITEMS.map((item) => item.id)) ?? NAV_ITEMS[0].id;
+  const activeId = useActiveSection(NAV_ITEMS.map((item) => item.id));
 
   return (
     <div className="fixed inset-x-0 bottom-4 z-50 flex items-center justify-center gap-3 px-4 sm:hidden">
-      <ScrubberTabBar
-        items={NAV_ITEMS.map((item) => ({ key: item.id, label: item.label }))}
-        activeKey={activeId}
-        onSelect={(id) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" })}
-        gapClassName="gap-8"
-        aria-label="Section navigation"
-      />
+      <Elevated offset={3} className="inline-flex rounded-3xl">
+        <Tabs
+          value={activeId}
+          onValueChange={(id) => {
+            document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }}
+        >
+          <TabsList aria-label="Section navigation" className="gap-2">
+            {NAV_ITEMS.map((item) => (
+              <TabItem
+                key={item.id}
+                value={item.id}
+                label={item.label}
+                icon={ICONS[item.id as keyof typeof ICONS]}
+                iconOnly
+                className="h-11 w-11"
+              />
+            ))}
+          </TabsList>
+        </Tabs>
+      </Elevated>
       <PageSwitchTab />
     </div>
   );
