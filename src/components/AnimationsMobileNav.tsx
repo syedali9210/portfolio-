@@ -2,7 +2,7 @@
 
 import { useLayoutEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { Elevated } from "@/lib/elevated";
 import { ANIMATIONS } from "@/data/animations";
 
@@ -38,9 +38,14 @@ function vibrate() {
  * edges via a mask-image so the strip reads as a continuous scrub, not a
  * page of buttons.
  *
- * Separate from MobileAnimationsSwitch (which flips between the portfolio
- * and this showcase entirely, not between entries within it) and from the
- * portfolio's own MobileNav (Projects/About me/etc., which don't exist under
+ * While pressed, a second round pill fades in just above the strip and
+ * mirrors the current label in the accent color — your thumb covers the
+ * strip itself during the drag, so without this you'd have no idea which
+ * entry you're scrubbing toward until you let go.
+ *
+ * Separate from AnimationsSwitch (which flips between the portfolio and this
+ * showcase entirely, not between entries within it) and from the portfolio's
+ * own MobileNav (Projects/About me/etc., which don't exist under
  * /animations).
  */
 export default function AnimationsMobileNav() {
@@ -120,51 +125,71 @@ export default function AnimationsMobileNav() {
 
   return (
     <div className="fixed inset-x-0 bottom-4 z-50 flex justify-center px-4 sm:hidden">
-      <Elevated offset={3} className="rounded-3xl">
-        <motion.div
-          ref={pillRef}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerCancel={handlePointerUp}
-          animate={{ scale: pressing ? 1.05 : 1 }}
-          transition={SPRING}
-          className="relative h-11 w-52 shrink-0 cursor-pointer touch-none overflow-hidden rounded-3xl select-none"
-        >
-          {/* Fixed-size frame matching the pill exactly, holding the mask —
-              the gradient's stops need to be relative to the *visible* pill
-              width, not the much-wider scrolling track, so the mask lives
-              here and the track (which does the actual moving) nests
-              inside it. */}
-          <div
-            className="absolute inset-0"
-            style={{
-              maskImage: "linear-gradient(to right, transparent, black 20%, black 80%, transparent)",
-              WebkitMaskImage: "linear-gradient(to right, transparent, black 20%, black 80%, transparent)",
-            }}
-          >
+      <div className="relative">
+        <AnimatePresence>
+          {pressing && (
             <motion.div
-              className="absolute top-1/2 left-0 flex items-center gap-6 whitespace-nowrap"
-              animate={{ x: offset, y: "-50%" }}
+              initial={{ opacity: 0, y: 6, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 6, scale: 0.9 }}
               transition={SPRING}
+              className="pointer-events-none absolute bottom-full left-1/2 mb-2.5 -translate-x-1/2"
             >
-              {NAVIGABLE.map((row, i) => (
-                <motion.span
-                  key={row.key}
-                  ref={(el) => {
-                    if (el) itemRefs.current.set(row.key, el);
-                  }}
-                  animate={{ color: i === shownIndex ? ACCENT : "var(--color-muted-foreground)" }}
-                  transition={SPRING}
-                  className="shrink-0 text-[13px] font-medium"
-                >
-                  {row.label}
-                </motion.span>
-              ))}
+              <Elevated offset={4} className="rounded-full px-4 py-2">
+                <span className="text-[13px] font-medium whitespace-nowrap" style={{ color: ACCENT }}>
+                  {shownRow.label}
+                </span>
+              </Elevated>
             </motion.div>
-          </div>
-        </motion.div>
-      </Elevated>
+          )}
+        </AnimatePresence>
+
+        <Elevated offset={3} className="rounded-3xl">
+          <motion.div
+            ref={pillRef}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={handlePointerUp}
+            animate={{ scale: pressing ? 1.05 : 1 }}
+            transition={SPRING}
+            className="relative h-11 w-52 shrink-0 cursor-pointer touch-none overflow-hidden rounded-3xl select-none"
+          >
+            {/* Fixed-size frame matching the pill exactly, holding the mask —
+                the gradient's stops need to be relative to the *visible* pill
+                width, not the much-wider scrolling track, so the mask lives
+                here and the track (which does the actual moving) nests
+                inside it. */}
+            <div
+              className="absolute inset-0"
+              style={{
+                maskImage: "linear-gradient(to right, transparent, black 20%, black 80%, transparent)",
+                WebkitMaskImage: "linear-gradient(to right, transparent, black 20%, black 80%, transparent)",
+              }}
+            >
+              <motion.div
+                className="absolute top-1/2 left-0 flex items-center gap-6 whitespace-nowrap"
+                animate={{ x: offset, y: "-50%" }}
+                transition={SPRING}
+              >
+                {NAVIGABLE.map((row, i) => (
+                  <motion.span
+                    key={row.key}
+                    ref={(el) => {
+                      if (el) itemRefs.current.set(row.key, el);
+                    }}
+                    animate={{ color: i === shownIndex ? ACCENT : "var(--color-muted-foreground)" }}
+                    transition={SPRING}
+                    className="shrink-0 text-[13px] font-medium"
+                  >
+                    {row.label}
+                  </motion.span>
+                ))}
+              </motion.div>
+            </div>
+          </motion.div>
+        </Elevated>
+      </div>
     </div>
   );
 }

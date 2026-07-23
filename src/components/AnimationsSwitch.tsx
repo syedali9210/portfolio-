@@ -2,39 +2,47 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Briefcase, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Elevated } from "@/lib/elevated";
 
 const OPTIONS = [
-  { id: "portfolio", label: "Portfolio", href: "/" },
-  { id: "animations", label: "Animations", href: "/animations" },
+  { id: "portfolio", href: "/", label: "Portfolio", icon: Briefcase },
+  { id: "animations", href: "/animations", label: "Animations", icon: Sparkles },
 ] as const;
 
 /**
- * Top-level switch between the portfolio and the animations showcase.
- * Desktop-only — lives in Nav's top-right corner, next to the clock.
- * Mobile gets its own separate control (MobileAnimationsSwitch), since
- * Nav's header collapses to just the wordmark below `sm`.
+ * Switch between the portfolio and the animations showcase — fixed to the
+ * viewport's top-right corner, outside the centered content column, at every
+ * breakpoint (same control on desktop and mobile, unlike Nav's own pill-nav
+ * which collapses below `sm`).
  */
-export default function AnimationsSwitch({ className }: { className?: string }) {
+export default function AnimationsSwitch() {
   const pathname = usePathname();
   const activeId = pathname?.startsWith("/animations") ? "animations" : "portfolio";
 
   return (
-    <div className={cn("flex items-center gap-0.5 rounded-full bg-muted p-1", className)}>
-      {OPTIONS.map((opt) => (
-        <Link
-          key={opt.id}
-          href={opt.href}
-          className={cn(
-            "rounded-full px-2.5 py-1 text-[13px] font-medium whitespace-nowrap transition-colors",
-            activeId === opt.id
-              ? "bg-card text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-          )}
-        >
-          {opt.label}
-        </Link>
-      ))}
+    <div className="fixed top-3 right-4 z-50">
+      <Elevated offset={2} className="flex items-center gap-0.5 rounded-full p-1">
+        {OPTIONS.map((opt) => {
+          const Icon = opt.icon;
+          const isActive = activeId === opt.id;
+          return (
+            <Link
+              key={opt.id}
+              href={opt.href}
+              aria-label={opt.label}
+              aria-current={isActive ? "page" : undefined}
+              className={cn(
+                "flex size-8 items-center justify-center rounded-full transition-colors",
+                isActive ? "bg-muted text-foreground" : "text-muted-foreground"
+              )}
+            >
+              <Icon size={16} strokeWidth={isActive ? 2 : 1.5} />
+            </Link>
+          );
+        })}
+      </Elevated>
     </div>
   );
 }

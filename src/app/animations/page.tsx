@@ -45,7 +45,11 @@ export default function AnimationsGreeting() {
         </div>
       </section>
 
-      <section className="mt-16">
+      {/* Redundant on mobile — the bottom scrubber nav already covers "jump
+          to any animation" there. Desktop keeps it since AnimationsNavRail's
+          left rail is less immediately discoverable than a list right in
+          the page's own content. */}
+      <section className="mt-16 hidden sm:block">
         <p className="mb-4 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
           Start with
         </p>

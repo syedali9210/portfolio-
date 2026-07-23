@@ -1,6 +1,6 @@
 import Nav from "@/components/Nav";
 import MobileNav from "@/components/MobileNav";
-import MobileAnimationsSwitch from "@/components/MobileAnimationsSwitch";
+import AnimationsSwitch from "@/components/AnimationsSwitch";
 import Scrubber from "@/components/Scrubber";
 import Hero from "@/components/sections/Hero";
 import Projects from "@/components/sections/Projects";
@@ -23,7 +23,7 @@ export default function Home() {
     <>
       <Nav />
       <MobileNav />
-      <MobileAnimationsSwitch />
+      <AnimationsSwitch />
       <Scrubber items={HOME_ITEMS} />
       <main className="flex flex-1 flex-col">
         <Hero />

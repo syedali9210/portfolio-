@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useActiveSection } from "@/hooks/use-active-section";
-import AnimationsSwitch from "@/components/AnimationsSwitch";
 
 // Absolute ("/#hash") rather than bare ("#hash") so these still work when
 // clicked from a sub-page like /projects/[slug] instead of silently
@@ -60,12 +59,9 @@ export default function Nav() {
           </div>
         </nav>
 
-        <div className="hidden items-center gap-3 sm:flex">
-          <span className="text-base text-muted-foreground tabular-nums">
-            {time ?? " "}
-          </span>
-          <AnimationsSwitch />
-        </div>
+        <span className="hidden text-base text-muted-foreground tabular-nums sm:inline">
+          {time ?? " "}
+        </span>
       </div>
     </header>
   );
