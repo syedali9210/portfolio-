@@ -24,6 +24,7 @@ import { useShape } from "@/lib/shape-context";
 import { useSurface } from "@/lib/surface-context";
 import { surfaceClasses } from "@/lib/surface-classes";
 import { useProximityHover } from "@/hooks/use-proximity-hover";
+import PetBuddyTabHop from "@/components/PetBuddyTabHop";
 
 /* ─────────────────────── Contexts ─────────────────────── */
 
@@ -150,10 +151,15 @@ Tabs.displayName = "Tabs";
 
 /* ─────────────────────── TabsList ─────────────────────── */
 
-type TabsListProps = ComponentPropsWithoutRef<typeof TabsPrimitive.List>;
+interface TabsListProps extends ComponentPropsWithoutRef<typeof TabsPrimitive.List> {
+  /** Opt-in: perches the pet-buddy mascot on the active tab and has it hop
+   *  over on switch, instead of just the plain sliding indicator. Off by
+   *  default so plain tab strips (e.g. MobileNav's section nav) are unaffected. */
+  petBuddy?: boolean;
+}
 
 const TabsList = forwardRef<HTMLDivElement, TabsListProps>(
-  ({ children, className, ...props }, ref) => {
+  ({ children, className, petBuddy = false, ...props }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const isMouseInside = useRef(false);
     const shape = useShape();
@@ -378,6 +384,8 @@ const TabsList = forwardRef<HTMLDivElement, TabsListProps>(
               />
             )}
           </AnimatePresence>
+
+          {petBuddy && selectedRect && <PetBuddyTabHop rect={selectedRect} />}
 
           {indexedChildren}
         </TabsPrimitive.List>
