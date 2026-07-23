@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { Elevated } from "@/lib/elevated";
 import { ANIMATIONS } from "@/data/animations";
+import PageSwitchTab from "@/components/PageSwitchTab";
 
 interface Row {
   key: string;
@@ -43,10 +44,12 @@ function vibrate() {
  * strip itself during the drag, so without this you'd have no idea which
  * entry you're scrubbing toward until you let go.
  *
- * Separate from AnimationsSwitch (which flips between the portfolio and this
- * showcase entirely, not between entries within it) and from the portfolio's
- * own MobileNav (Projects/About me/etc., which don't exist under
- * /animations).
+ * Renders beside PageSwitchTab (the circular Portfolio/Animations toggle) in
+ * the same fixed bottom row — that one flips between the portfolio and this
+ * showcase entirely, not between entries within it. Separate from the
+ * portfolio's own MobileNav (Projects/About me/etc., which don't exist under
+ * /animations) and from AnimationsSwitch (the desktop-only equivalent of
+ * PageSwitchTab, fixed to the top-right corner instead).
  */
 export default function AnimationsMobileNav() {
   const pathname = usePathname();
@@ -124,7 +127,7 @@ export default function AnimationsMobileNav() {
   }
 
   return (
-    <div className="fixed inset-x-0 bottom-4 z-50 flex justify-center px-4 sm:hidden">
+    <div className="fixed inset-x-0 bottom-4 z-50 flex items-center justify-center gap-3 px-4 sm:hidden">
       <div className="relative">
         <AnimatePresence>
           {pressing && (
@@ -190,6 +193,7 @@ export default function AnimationsMobileNav() {
           </motion.div>
         </Elevated>
       </div>
+      <PageSwitchTab />
     </div>
   );
 }

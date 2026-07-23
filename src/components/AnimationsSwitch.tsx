@@ -12,17 +12,17 @@ const OPTIONS = [
 ] as const;
 
 /**
- * Switch between the portfolio and the animations showcase — fixed to the
- * viewport's top-right corner, outside the centered content column, at every
- * breakpoint (same control on desktop and mobile, unlike Nav's own pill-nav
- * which collapses below `sm`).
+ * Desktop/tablet switch between the portfolio and the animations showcase —
+ * fixed to the viewport's top-right corner, outside the centered content
+ * column. Below `sm`, PageSwitchTab takes over instead: a single circular
+ * tab that sits beside the bottom nav bar rather than floating up top.
  */
 export default function AnimationsSwitch() {
   const pathname = usePathname();
   const activeId = pathname?.startsWith("/animations") ? "animations" : "portfolio";
 
   return (
-    <div className="fixed top-3 right-4 z-50">
+    <div className="fixed top-3 right-4 z-50 hidden sm:block">
       <Elevated offset={2} className="flex items-center gap-0.5 rounded-full p-1">
         {OPTIONS.map((opt) => {
           const Icon = opt.icon;

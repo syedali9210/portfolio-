@@ -1,5 +1,4 @@
 import PetBuddyGreeting from "@/components/PetBuddyGreeting";
-import { ANIMATIONS } from "@/data/animations";
 
 export const metadata = {
   title: "Animations — Syed Ali",
@@ -42,30 +41,6 @@ export default function AnimationsGreeting() {
             nav to see it in action and read the story behind it. New stuff shows up whenever I get
             nerd-sniped by something new.
           </p>
-        </div>
-      </section>
-
-      {/* Redundant on mobile — the bottom scrubber nav already covers "jump
-          to any animation" there. Desktop keeps it since AnimationsNavRail's
-          left rail is less immediately discoverable than a list right in
-          the page's own content. */}
-      <section className="mt-16 hidden sm:block">
-        <p className="mb-4 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
-          Start with
-        </p>
-        <div className="flex flex-col gap-1">
-          {ANIMATIONS.map((entry) => (
-            <a
-              key={entry.id}
-              href={`/animations/${entry.id}`}
-              className="group flex items-center justify-between rounded-lg px-3 py-2.5 -mx-3 transition-colors hover:bg-muted"
-            >
-              <span className="text-base text-foreground">{entry.name}</span>
-              <span className="text-muted-foreground transition-transform group-hover:translate-x-0.5">
-                →
-              </span>
-            </a>
-          ))}
         </div>
       </section>
     </div>

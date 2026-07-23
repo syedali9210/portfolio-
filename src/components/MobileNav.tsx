@@ -5,6 +5,7 @@ import { Tabs, TabsList, TabItem } from "@/components/ui/tabs";
 import { Elevated } from "@/lib/elevated";
 import { useActiveSection } from "@/hooks/use-active-section";
 import { NAV_ITEMS } from "@/components/Nav";
+import PageSwitchTab from "@/components/PageSwitchTab";
 
 const ICONS = {
   projects: Layers,
@@ -17,7 +18,7 @@ export default function MobileNav() {
   const activeId = useActiveSection(NAV_ITEMS.map((item) => item.id));
 
   return (
-    <div className="fixed inset-x-0 bottom-4 z-50 flex justify-center px-4 sm:hidden">
+    <div className="fixed inset-x-0 bottom-4 z-50 flex items-center justify-center gap-3 px-4 sm:hidden">
       <Elevated offset={3} className="inline-flex rounded-3xl">
         <Tabs
           value={activeId}
@@ -39,6 +40,7 @@ export default function MobileNav() {
           </TabsList>
         </Tabs>
       </Elevated>
+      <PageSwitchTab />
     </div>
   );
 }
