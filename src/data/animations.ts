@@ -94,11 +94,11 @@ export const ANIMATIONS: AnimationEntry[] = [
     Demo: ScrubberCallout,
     story: {
       started:
-        "A normal dot-nav felt too static for how much scrolling a single-page portfolio needs. I wanted something that made the page feel like it could be scanned and jumped through quickly, more like scrubbing a video timeline than clicking a menu.",
+        "A normal row of nav icons felt too static, and once these animations lived on their own pages instead of one long scroll, a plain tab bar felt like a step backward. I wanted moving between them to feel like scrubbing a timeline, not clicking a menu — and I wanted you to actually see the name of where you're going, not guess from an icon.",
       built:
-        "Drag it, click anywhere on the track, or use the arrow keys to jump between sections. It syncs both ways: scroll normally and an `IntersectionObserver` moves the playhead to match, or drag the playhead and it scrolls the page for you, with a ref flag so the observer doesn't fight the drag mid-gesture.",
+        "On mobile it's a horizontally scrolling name strip: press it and it grows slightly, the 'picked up' cue, then hold and drag and it steps to the next or previous entry every 40px of travel, re-anchoring after each step so it never flip-flops near a boundary. Each step fires a short haptic buzz. Neighbors fade toward the pill's edges through a mask-image instead of just clipping, so it reads as one continuous scrub. Release and it navigates wherever you landed. Desktop gets a simpler cousin — a left-rail list of names, current page highlighted in terracotta, hover previewing the same treatment without disturbing the real selection.",
       future:
-        "Turning it into a full categorized index — colored groups, names right there in the list — is step one of where I wanted this to go. Next is probably a keyboard-driven fuzzy search so I can jump anywhere by typing instead of scrubbing.",
+        "I want the drag threshold to ease slightly as you build up speed, like real scrubbing accelerates the faster you drag. A keyboard-driven fuzzy search so I can jump anywhere by typing is on the list too.",
     },
   },
 ];
