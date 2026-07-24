@@ -16,6 +16,8 @@ export interface AnimationEntry {
   id: string;
   name: string;
   Demo: ComponentType;
+  // One-line card-grid description — the full story lives in `story` below.
+  blurb: string;
   story: AnimationStory;
 }
 
@@ -27,6 +29,8 @@ export const ANIMATIONS: AnimationEntry[] = [
     id: "maze-walk",
     name: "Maze Walk",
     Demo: PetBuddyPathHero,
+    blurb:
+      "An isometric maze walkway where a pixel pet paces the centerline, chased by a cursor-following spotlight.",
     story: {
       started:
         "I found a vanilla-JS reference for an isometric maze walkway and could not stop thinking about it — the pet walking back and forth along the centerline, pausing and bouncing at each end, a cursor-following spotlight revealing a glowing copy of the path edges wherever your mouse went. I liked it so much I decided to rebuild it pixel-for-pixel inside React instead of just admiring it from the sidelines.",
@@ -40,6 +44,8 @@ export const ANIMATIONS: AnimationEntry[] = [
     id: "hello",
     name: "Hello",
     Demo: PetBuddyGreeting,
+    blurb:
+      "The same pixel pet, idling by a sign — a native web component that tracks your cursor and reaches out to it.",
     story: {
       started:
         "Same character and rig as the maze-walk hero, just idling next to a little sign instead of walking a path. I wanted a version of the buddy that felt less like a hero banner and more like a mascot that's just... there, hanging out, saying hi when you scroll past.",
@@ -53,6 +59,8 @@ export const ANIMATIONS: AnimationEntry[] = [
     id: "tab-hop",
     name: "Tab Hop",
     Demo: TabHopDemo,
+    blurb:
+      "A tab switcher where the mascot physically leaps to whichever tab you pick, squash and stretch included.",
     story: {
       started:
         "Switching tabs with a plain sliding underline felt dead to me — I wanted the mascot to actually pick the tab instead of a second indicator quietly competing with the first one.",
@@ -66,6 +74,8 @@ export const ANIMATIONS: AnimationEntry[] = [
     id: "notch-card",
     name: "Info Notch Card",
     Demo: NotchCardDemo,
+    blurb:
+      "A MacBook-notch-styled info card that grows on hover to reveal contact links and an availability badge.",
     story: {
       started:
         "I wanted a persistent 'who is this' widget that didn't take up permanent space — something styled after a MacBook's screen notch, flush against the top, flat on top, rounded only on the bottom.",
@@ -79,6 +89,8 @@ export const ANIMATIONS: AnimationEntry[] = [
     id: "scratch-card",
     name: "Scratch Card",
     Demo: ScratchCardDemo,
+    blurb:
+      "Scratch a foil surface off with a real canvas brush to reveal whatever's hiding underneath.",
     story: {
       started:
         "I wanted to gate my portfolio's Archive tab behind a bit of friction instead of just showing everything immediately, and I'd been wanting an excuse to try the Framer University 'Image Scratch' technique for a while.",
@@ -92,6 +104,8 @@ export const ANIMATIONS: AnimationEntry[] = [
     id: "nav-scrubber",
     name: "Nav Scrubber",
     Demo: ScrubberCallout,
+    blurb:
+      "The drag-to-step scrubber powering this very page's own navigation, with a haptic buzz per step.",
     story: {
       started:
         "A normal row of nav icons felt too static, and once these animations lived on their own pages instead of one long scroll, a plain tab bar felt like a step backward. I wanted moving between them to feel like scrubbing a timeline, not clicking a menu — and I wanted you to actually see the name of where you're going, not guess from an icon.",
