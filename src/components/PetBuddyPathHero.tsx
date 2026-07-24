@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 
 /**
  * Ported from the standalone "pet buddy hero" reference (index.html): an
@@ -59,6 +59,48 @@ function inPoly(p: [number, number], poly: [number, number][]) {
 }
 const inUnion = (p: [number, number]) => inPoly(p, MAIN) || inPoly(p, STRIP);
 
+// Wall-quad path data (the hatched slab-depth strips along bottom-facing
+// edges) — pure geometry derived from MAIN/STRIP/DEPTH, identical on every
+// mount, so it's computed once here instead of re-walking every edge with
+// point-in-polygon checks each time the component mounts.
+const WALL_QUADS: string[] = (() => {
+  const quads: string[] = [];
+  [MAIN, STRIP].forEach((poly) => {
+    for (let i = 0; i < poly.length; i++) {
+      const a = poly[i];
+      const b = poly[(i + 1) % poly.length];
+      const len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+      if (len < 1) continue;
+      const n = Math.max(1, Math.ceil(len / 6));
+      let run: { t0: number; t1: number } | null = null;
+      const emit = (r: { t0: number; t1: number }) => {
+        const x0 = a[0] + (b[0] - a[0]) * r.t0;
+        const y0 = a[1] + (b[1] - a[1]) * r.t0;
+        const x1 = a[0] + (b[0] - a[0]) * r.t1;
+        const y1 = a[1] + (b[1] - a[1]) * r.t1;
+        quads.push(`M${x0},${y0} L${x1},${y1} L${x1},${y1 + DEPTH} L${x0},${y0 + DEPTH} Z`);
+      };
+      for (let k = 0; k < n; k++) {
+        const t0 = k / n;
+        const t1 = (k + 1) / n;
+        const tm = (t0 + t1) / 2;
+        const mx = a[0] + (b[0] - a[0]) * tm;
+        const my = a[1] + (b[1] - a[1]) * tm;
+        const facing = !inUnion([mx, my + 2.5]) && inUnion([mx, my - 2.5]);
+        if (facing) {
+          if (!run) run = { t0, t1 };
+          else run.t1 = t1;
+        } else if (run) {
+          emit(run);
+          run = null;
+        }
+      }
+      if (run) emit(run);
+    }
+  });
+  return quads;
+})();
+
 export default function PetBuddyPathHero() {
   const svgRef = useRef<SVGSVGElement>(null);
   const wallsRef = useRef<SVGGElement>(null);
@@ -76,7 +118,7 @@ export default function PetBuddyPathHero() {
   const shin3Ref = useRef<SVGRectElement>(null);
   const shin4Ref = useRef<SVGRectElement>(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const svg = svgRef.current;
     const wallsEl = wallsRef.current;
     const glowLayer = glowLayerRef.current;
@@ -96,44 +138,16 @@ export default function PetBuddyPathHero() {
     const svgNS = "http://www.w3.org/2000/svg";
 
     // Slab depth: extruded hatched side walls, visible only where the region
-    // just below an edge is outside the walkway (bottom-facing edges).
-    [MAIN, STRIP].forEach((poly) => {
-      for (let i = 0; i < poly.length; i++) {
-        const a = poly[i];
-        const b = poly[(i + 1) % poly.length];
-        const len = Math.hypot(b[0] - a[0], b[1] - a[1]);
-        if (len < 1) continue;
-        const n = Math.max(1, Math.ceil(len / 6));
-        let run: { t0: number; t1: number } | null = null;
-        const emit = (r: { t0: number; t1: number }) => {
-          const x0 = a[0] + (b[0] - a[0]) * r.t0;
-          const y0 = a[1] + (b[1] - a[1]) * r.t0;
-          const x1 = a[0] + (b[0] - a[0]) * r.t1;
-          const y1 = a[1] + (b[1] - a[1]) * r.t1;
-          const q = document.createElementNS(svgNS, "path");
-          q.setAttribute("d", `M${x0},${y0} L${x1},${y1} L${x1},${y1 + DEPTH} L${x0},${y0 + DEPTH} Z`);
-          q.setAttribute("fill", "url(#pbh-hatch)");
-          q.setAttribute("stroke", STROKE);
-          q.setAttribute("stroke-width", "0.75");
-          wallsEl.appendChild(q);
-        };
-        for (let k = 0; k < n; k++) {
-          const t0 = k / n;
-          const t1 = (k + 1) / n;
-          const tm = (t0 + t1) / 2;
-          const mx = a[0] + (b[0] - a[0]) * tm;
-          const my = a[1] + (b[1] - a[1]) * tm;
-          const facing = !inUnion([mx, my + 2.5]) && inUnion([mx, my - 2.5]);
-          if (facing) {
-            if (!run) run = { t0, t1 };
-            else run.t1 = t1;
-          } else if (run) {
-            emit(run);
-            run = null;
-          }
-        }
-        if (run) emit(run);
-      }
+    // just below an edge is outside the walkway (bottom-facing edges). Path
+    // data itself is precomputed in WALL_QUADS above — this just builds the
+    // DOM nodes for this instance.
+    WALL_QUADS.forEach((d) => {
+      const q = document.createElementNS(svgNS, "path");
+      q.setAttribute("d", d);
+      q.setAttribute("fill", "url(#pbh-hatch)");
+      q.setAttribute("stroke", STROKE);
+      q.setAttribute("stroke-width", "0.75");
+      wallsEl.appendChild(q);
     });
 
     // Cursor spotlight: orange stroke-only copies of every path edge,
@@ -307,6 +321,9 @@ export default function PetBuddyPathHero() {
       render(pose(), performance.now());
       raf = requestAnimationFrame(frame);
     }
+    // Now that it's actually positioned, reveal it (see the group's opacity
+    // comment in the JSX above).
+    petPos.style.opacity = "1";
 
     return () => {
       if (raf) cancelAnimationFrame(raf);
@@ -346,7 +363,14 @@ export default function PetBuddyPathHero() {
 
           <g ref={glowLayerRef} mask="url(#pbh-spot-mask)" style={{ opacity: 0, pointerEvents: "none", transition: "opacity 0.35s ease" }} />
 
-          <g ref={petPosRef} style={{ pointerEvents: "none" }}>
+          {/* Starts hidden: this group's actual position only exists as an
+              imperative transform set by the effect below, so on a fresh
+              (non-hydrated) load the raw server-rendered markup has no
+              transform yet and would otherwise flash at the origin for a
+              frame. Opacity is static/SSR-safe, so the browser's very first
+              paint already renders it invisible; the effect reveals it only
+              once positioned, before that first paint of the hydrated tree. */}
+          <g ref={petPosRef} style={{ pointerEvents: "none", opacity: 0 }}>
             <g ref={petMirrorRef}>
               <ellipse ref={petShadowRef} cx="0" cy="0" rx="30" ry="8" fill="#000" opacity="0.45" />
               <g ref={petBobRef}>

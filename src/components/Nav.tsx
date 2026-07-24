@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useActiveSection } from "@/hooks/use-active-section";
 
@@ -18,6 +19,11 @@ export const NAV_ITEMS = [
 export default function Nav() {
   const [time, setTime] = useState<string | null>(null);
   const activeId = useActiveSection(NAV_ITEMS.map((item) => item.id));
+  // These are hash-links into Home's own sections — meaningless on the
+  // Animations pages, which don't have a "Projects" or "Contact" section to
+  // jump to.
+  const pathname = usePathname();
+  const showSectionNav = !pathname?.startsWith("/animations");
 
   useEffect(() => {
     const update = () =>
@@ -40,24 +46,26 @@ export default function Nav() {
           Syed.Ali
         </Link>
 
-        <nav className="hidden items-center gap-2 rounded-full bg-muted p-1.5 sm:flex">
-          <div className="flex items-center gap-6 sm:gap-10">
-            {NAV_ITEMS.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex items-center rounded-full px-2 py-1 text-base font-medium tracking-tight transition-colors",
-                  activeId === item.id
-                    ? "text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {item.label}
-              </a>
-            ))}
-          </div>
-        </nav>
+        {showSectionNav && (
+          <nav className="hidden items-center gap-2 rounded-full bg-muted p-1.5 sm:flex">
+            <div className="flex items-center gap-6 sm:gap-10">
+              {NAV_ITEMS.map((item) => (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center rounded-full px-2 py-1 text-base font-medium tracking-tight transition-colors",
+                    activeId === item.id
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {item.label}
+                </a>
+              ))}
+            </div>
+          </nav>
+        )}
 
         <span className="hidden text-base text-muted-foreground tabular-nums sm:inline">
           {time ?? " "}
