@@ -398,6 +398,12 @@ export default function StickerDrag({
       }
 
       if (state.held || state.peeling || state.sticking || holoDecayActive) {
+        // Standard self-scheduling rAF loop: `tick` re-requests itself for
+        // the next frame. Safe despite the "used before declared" flag —
+        // this line only runs inside an actual animation frame, always
+        // after the `const tick = useCallback(...)` assignment below has
+        // completed, so the closure's `tick` binding is already set.
+        // eslint-disable-next-line react-hooks/immutability
         animationRef.current = requestAnimationFrame(tick);
       } else {
         animationRef.current = null;
@@ -552,13 +558,12 @@ export default function StickerDrag({
   useEffect(() => {
     const gl = glRef.current;
     if (!gl || !programRef.current) return;
+    const state = stateRef.current;
 
     const img = new Image();
     img.crossOrigin = "anonymous";
 
     img.onload = () => {
-      const state = stateRef.current;
-
       if (textureRef.current) {
         gl.deleteTexture(textureRef.current);
       }
@@ -588,7 +593,7 @@ export default function StickerDrag({
     img.src = image;
 
     return () => {
-      stateRef.current.texReady = false;
+      state.texReady = false;
     };
   }, [image, handleResize, updateShadowCSS]);
 

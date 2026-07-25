@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, type ComponentProps } from "react"
 import { differenceInMonths, parse } from "date-fns"
+import Image from "next/image"
 import ReactMarkdown from "react-markdown"
 
 import { cn } from "@/lib/utils"
@@ -89,10 +90,12 @@ export function ExperienceItem({ experience }: ExperienceItemProps) {
       <div className="not-prose flex items-center gap-3">
         <div className="flex size-6 shrink-0 items-center justify-center">
           {experience.companyLogo ? (
-            <img
+            <Image
               src={experience.companyLogo}
               alt={experience.companyName}
-              className="size-6 rounded-full"
+              width={24}
+              height={24}
+              className="size-6 rounded-full object-cover"
               aria-hidden
             />
           ) : (

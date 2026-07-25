@@ -203,7 +203,6 @@
     }
   }
 
-  const TAU = Math.PI*2;
   const TICK = 1/12, PIX = 3, EYE_STP = 3.5;
   const q = (v,s) => Math.round(v/s)*s;
   const clamp = (v,a,b) => Math.max(a, Math.min(b, v));

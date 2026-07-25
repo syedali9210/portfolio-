@@ -177,6 +177,10 @@ const TabsList = forwardRef<HTMLDivElement, TabsListProps>(
 
     useLayoutEffect(() => {
       setValueOrder?.(values);
+      // `values` is a fresh array every render; `valueOrderKey` is its
+      // stable, deduped proxy so this only reruns when the actual tab
+      // order changes.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [setValueOrder, valueOrderKey]);
 
     const {

@@ -20,6 +20,11 @@ export function ThemeSwitcher({ className }: ThemeSwitcherProps) {
   const [click] = useClickSound();
   const [mounted, setMounted] = useState(false);
 
+  // next-themes' own documented hydration guard: `resolvedTheme` is
+  // undefined during SSR (theme lives in localStorage), so this renders a
+  // neutral placeholder server-side and swaps in the real icon only once
+  // mounted client-side, avoiding a hydration mismatch.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setMounted(true), []);
 
   const switchTheme = () => {

@@ -11,6 +11,10 @@ import Script from "next/script";
 // itself (re-exported as React.JSX) rather than the old global JSX
 // namespace, so the augmentation has to target that module directly.
 declare module "react" {
+  // This is TS's declaration-merging syntax for augmenting
+  // JSX.IntrinsicElements, not a namespace used as a code-organization
+  // construct — required here, can't be rewritten as an ES module.
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
       "pet-buddy-greeting": React.DetailedHTMLProps<
