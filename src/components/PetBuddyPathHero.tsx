@@ -645,6 +645,15 @@ export default function PetBuddyPathHero({ interactive = false }: { interactive?
           <p className="text-sm text-muted-foreground">Press the arrow to make the buddy move</p>
         </div>
       )}
+
+      {interactive && (
+        // Desktop counterpart to the d-pad's hint text above — hidden
+        // below lg since that's where the d-pad (and its own hint) takes
+        // over instead of the keyboard.
+        <p className="hidden text-sm text-muted-foreground lg:block">
+          Use the arrow to make the buddy move
+        </p>
+      )}
     </div>
   );
 }
