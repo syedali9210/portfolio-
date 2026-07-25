@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ANIMATIONS, type AnimationEntry } from "@/data/animations";
 
@@ -6,6 +9,16 @@ import { ANIMATIONS, type AnimationEntry } from "@/data/animations";
 // since a grid of cards isn't the place to actually drive them.
 function AnimationCard({ entry }: { entry: AnimationEntry }) {
   const { Demo } = entry;
+  // Six of these mount at once, each doing its own real setup work (SVG
+  // construction, canvas painting, a custom-element upgrade) — landing on
+  // this page via the route crossfade, that work competed with the
+  // transition's first paint and stalled it into a blank flash. Deferring
+  // the actual Demo mount by a frame lets the transition paint first.
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setReady(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
 
   return (
     <Link
@@ -22,7 +35,7 @@ function AnimationCard({ entry }: { entry: AnimationEntry }) {
             fit the card — shrinking a finished layout instead of forcing a
             narrow one. */}
         <div inert className="pointer-events-none flex w-[420px] shrink-0 origin-center scale-[0.6] items-center justify-center">
-          <Demo />
+          {ready && <Demo />}
         </div>
       </div>
 
