@@ -51,7 +51,8 @@ export const projects: Project[] = [
     title: "Kodex",
     meta: "BASENINE, 2026",
     tag: "Web Redesign",
-    description: "Redesigning Kodex's digital experience for enterprise customers.",
+    description:
+      "Redesigned Kodex's marketing site so a mature B2B compliance platform finally feels as trustworthy and easy to evaluate as the product actually is.",
     gradient: "from-[#7f5d83] to-[#7c7340]",
     image: "/images/case-studies/kodex/kodex-screenshot.png",
     caseStudy: {
@@ -172,7 +173,8 @@ export const projects: Project[] = [
     title: "Uniqkey",
     meta: "BASENINE, 2026",
     tag: "Web Design",
-    description: "Designing a landing page that turns security awareness into action.",
+    description:
+      "Designed a landing page that makes data breach risk feel real enough for businesses to actually act on, instead of more jargon to tune out.",
     gradient: "from-[#3a4855] to-[#545b3c]",
     image: "/images/case-studies/uniqkey/uniqkey-screenshot.png",
     caseStudy: {
