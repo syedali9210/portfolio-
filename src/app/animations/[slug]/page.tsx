@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import { ANIMATIONS } from "@/data/animations";
 import AnimationSection from "@/components/animations/AnimationSection";
 
@@ -21,17 +20,5 @@ export default async function AnimationPage({ params }: { params: Promise<{ slug
 
   if (!entry) notFound();
 
-  return (
-    <>
-      <div className="mx-auto w-full max-w-[680px] px-4 pt-6 sm:px-6">
-        <Link
-          href="/animations"
-          className="inline-flex items-center gap-1.5 text-base text-muted-foreground transition-colors hover:text-foreground"
-        >
-          ← Back to animations
-        </Link>
-      </div>
-      <AnimationSection entry={entry} />
-    </>
-  );
+  return <AnimationSection entry={entry} />;
 }

@@ -2,25 +2,48 @@
 
 import { useState, type ReactNode } from "react";
 import { RotateCcw } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 // Forces a clean remount of the demo on click (key bump on the wrapper)
 // instead of a bespoke reset API per demo — these range from a canvas
 // scratch surface to a rAF-driven SVG walk cycle to a registered custom
 // element, so "unmount and mount fresh" is the one restart mechanism that
 // works identically across all of them.
-export default function AnimationStage({ children }: { children: ReactNode }) {
+export default function AnimationStage({
+  children,
+  fullscreen = false,
+}: {
+  children: ReactNode;
+  fullscreen?: boolean;
+}) {
   const [resetKey, setResetKey] = useState(0);
 
   return (
-    <div className="relative flex w-full items-center justify-center overflow-hidden rounded-2xl bg-card p-6 shadow-[var(--shadow-3)] sm:p-10">
+    <div
+      className={cn(
+        "relative flex w-full items-center justify-center overflow-hidden",
+        fullscreen
+          ? "h-full bg-background"
+          : "rounded-2xl bg-card p-6 shadow-[var(--shadow-3)] sm:p-10"
+      )}
+    >
       <button
         type="button"
         onClick={() => setResetKey((k) => k + 1)}
         aria-label="Restart animation"
         title="Restart animation"
-        className="absolute top-3 right-3 z-10 flex size-7 shrink-0 items-center justify-center rounded-md bg-card text-muted-foreground shadow-[var(--shadow-2)] transition-colors hover:bg-muted hover:text-foreground"
+        className={cn(
+          "absolute z-10 flex shrink-0 items-center justify-center text-muted-foreground shadow-[var(--shadow-2)] transition-colors hover:bg-muted hover:text-foreground",
+          fullscreen
+            ? // Beside AnimationsChrome's hide-nav toggle — top-right on
+              // mobile (AnimationsMobileNav owns the bottom row there),
+              // bottom-right from sm up (AnimationsSwitch owns top-right
+              // at that size, AnimationsMobileNav is gone).
+              "top-4 right-16 size-9 rounded-full bg-card/80 backdrop-blur sm:top-auto sm:right-20 sm:bottom-6"
+            : "top-3 right-3 size-7 rounded-md bg-card"
+        )}
       >
-        <RotateCcw className="size-3.5" />
+        <RotateCcw className={fullscreen ? "size-4" : "size-3.5"} />
       </button>
       <div key={resetKey} className="contents">
         {children}

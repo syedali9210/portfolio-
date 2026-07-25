@@ -1,6 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useRef } from "react";
+import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from "lucide-react";
 
 /**
  * Ported from the standalone "pet buddy hero" reference (index.html): an
@@ -101,7 +102,11 @@ const WALL_QUADS: string[] = (() => {
   return quads;
 })();
 
-export default function PetBuddyPathHero() {
+// Playable on /animations/maze-walk: `interactive` disables the ambient
+// back-and-forth pacing and hands direction control to the caller — arrow
+// keys on desktop, an on-screen d-pad below the frame on touch/tablet sizes.
+// The Home hero never passes this, so it keeps its original ambient walk.
+export default function PetBuddyPathHero({ interactive = false }: { interactive?: boolean }) {
   const svgRef = useRef<SVGSVGElement>(null);
   const wallsRef = useRef<SVGGElement>(null);
   const glowLayerRef = useRef<SVGGElement>(null);
@@ -117,6 +122,29 @@ export default function PetBuddyPathHero() {
   const shin2Ref = useRef<SVGRectElement>(null);
   const shin3Ref = useRef<SVGRectElement>(null);
   const shin4Ref = useRef<SVGRectElement>(null);
+  // Which of the 4 arrow keys are currently held — read by the rAF loop
+  // each frame and written by both the keyboard listener and the on-screen
+  // d-pad buttons. A ref (not state) since it's mutated from event handlers
+  // without needing a React re-render on every key/pointer event.
+  //
+  // The walkway is a fixed 1D path, but it's isometric, so each segment
+  // points in a genuinely different screen direction (some run up-right,
+  // some up-left, some down-right) — there's no single "forward is always
+  // the right key" mapping that feels correct on every segment. Instead,
+  // each frame picks whichever arrow key actually matches *this* segment's
+  // direction (see segmentDirectionKeys below), the same way you'd expect
+  // an isometric character to only respond to the key that matches the
+  // corridor it's currently walking.
+  const heldKeysRef = useRef<Set<string>>(new Set());
+
+  const pressUp = () => heldKeysRef.current.add("ArrowUp");
+  const releaseUp = () => heldKeysRef.current.delete("ArrowUp");
+  const pressDown = () => heldKeysRef.current.add("ArrowDown");
+  const releaseDown = () => heldKeysRef.current.delete("ArrowDown");
+  const pressLeft = () => heldKeysRef.current.add("ArrowLeft");
+  const releaseLeft = () => heldKeysRef.current.delete("ArrowLeft");
+  const pressRight = () => heldKeysRef.current.add("ArrowRight");
+  const releaseRight = () => heldKeysRef.current.delete("ArrowRight");
 
   useLayoutEffect(() => {
     const svg = svgRef.current;
@@ -188,6 +216,24 @@ export default function PetBuddyPathHero() {
     svg.addEventListener("pointermove", onPointerMove);
     svg.addEventListener("pointerleave", onPointerLeave);
 
+    const isTypingTarget = (target: EventTarget | null) =>
+      target instanceof HTMLElement && (target.tagName === "INPUT" || target.tagName === "TEXTAREA");
+    const ARROW_KEYS = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"]);
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (isTypingTarget(e.target) || !ARROW_KEYS.has(e.key)) return;
+      heldKeysRef.current.add(e.key);
+      e.preventDefault();
+    };
+    const onKeyUp = (e: KeyboardEvent) => {
+      if (!ARROW_KEYS.has(e.key)) return;
+      heldKeysRef.current.delete(e.key);
+    };
+    if (interactive) {
+      window.addEventListener("keydown", onKeyDown);
+      window.addEventListener("keyup", onKeyUp);
+    }
+
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const segs: { x0: number; y0: number; x1: number; y1: number; len: number; start: number }[] = [];
@@ -215,6 +261,25 @@ export default function PetBuddyPathHero() {
     const q = (v: number, s: number) => Math.round(v / s) * s;
     const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
     const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
+
+    function segmentAt(t: number) {
+      let idx = segs.findIndex((s) => t >= s.start && t <= s.start + s.len);
+      if (idx === -1) idx = t <= 0 ? 0 : segs.length - 1;
+      return segs[idx];
+    }
+
+    // Which arrow key advances/retreats along a given segment, based on its
+    // actual on-screen direction — every segment here is a true isometric
+    // diagonal (NE, NW, or SE in this particular walkway), so only one key
+    // pair is ever the "right" one for it, and it changes at each corner.
+    function directionKeysFor(s: { x0: number; y0: number; x1: number; y1: number }) {
+      const dx = s.x1 - s.x0;
+      const dy = s.y1 - s.y0;
+      if (dx >= 0 && dy <= 0) return { forwardKey: "ArrowUp", backwardKey: "ArrowDown" }; // NE
+      if (dx <= 0 && dy <= 0) return { forwardKey: "ArrowLeft", backwardKey: "ArrowRight" }; // NW
+      if (dx >= 0 && dy >= 0) return { forwardKey: "ArrowRight", backwardKey: "ArrowLeft" }; // SE
+      return { forwardKey: "ArrowDown", backwardKey: "ArrowUp" }; // SW
+    }
 
     let travelled = 0;
     let dir = 1;
@@ -290,7 +355,28 @@ export default function PetBuddyPathHero() {
       const dt = clamp((now - last) / 1000 || 0.016, 0.001, 0.05);
       last = now;
 
-      if (!paused) {
+      if (interactive) {
+        // Held-key/button state drives direction directly instead of the
+        // ambient bounce-at-the-ends cycle. Which key counts as forward vs
+        // backward is re-evaluated every frame from the *current* segment
+        // — holding both (or holding a key that doesn't match this
+        // segment's direction) cancels out and the buddy just stands.
+        const { forwardKey, backwardKey } = directionKeysFor(segmentAt(travelled));
+        const held = heldKeysRef.current;
+        const forward = held.has(forwardKey);
+        const backward = held.has(backwardKey);
+        const active = forward !== backward;
+        paused = !active;
+        if (active) {
+          dir = forward ? 1 : -1;
+          travelled = clamp(travelled + dir * SPEED * dt, 0, total);
+          stepTimer += dt * 1000;
+          if (stepTimer >= STEP_MS) {
+            stepTimer = 0;
+            stepPhase = 1 - stepPhase;
+          }
+        }
+      } else if (!paused) {
         travelled += dir * SPEED * dt;
         if (travelled >= total) {
           travelled = total;
@@ -314,7 +400,9 @@ export default function PetBuddyPathHero() {
       raf = requestAnimationFrame(frame);
     }
 
-    if (reduce) {
+    if (interactive) paused = true; // idle, standing still until a key/button is held
+
+    if (reduce && !interactive) {
       travelled = total * 0.42;
       render(pose(), performance.now());
     } else {
@@ -330,11 +418,18 @@ export default function PetBuddyPathHero() {
       if (restTimer) clearTimeout(restTimer);
       svg.removeEventListener("pointermove", onPointerMove);
       svg.removeEventListener("pointerleave", onPointerLeave);
+      if (interactive) {
+        window.removeEventListener("keydown", onKeyDown);
+        window.removeEventListener("keyup", onKeyUp);
+      }
     };
-  }, []);
+  }, [interactive]);
+
+  const dpadButtonClass =
+    "flex size-10 items-center justify-center rounded-lg bg-card text-muted-foreground shadow-[var(--shadow-2)] transition-colors select-none touch-none hover:bg-muted hover:text-foreground active:bg-muted active:text-foreground";
 
   return (
-    <div className="relative mx-auto w-full max-w-[680px]">
+    <div className="relative mx-auto flex w-full max-w-[680px] flex-col items-center gap-6">
       <svg
         ref={svgRef}
         viewBox="0 0 1041 435"
@@ -488,6 +583,68 @@ export default function PetBuddyPathHero() {
           </g>
         </defs>
       </svg>
+
+      {interactive && (
+        // Desktop relies on arrow keys (see the keydown listener above) —
+        // this on-screen d-pad is the touch/tablet equivalent, hidden once
+        // a keyboard is the expected input.
+        <div className="flex flex-col items-center gap-3 lg:hidden">
+          <div className="grid grid-cols-3 grid-rows-3 gap-1.5">
+            <span aria-hidden />
+            <button
+              type="button"
+              aria-label="Move buddy up"
+              onPointerDown={pressUp}
+              onPointerUp={releaseUp}
+              onPointerLeave={releaseUp}
+              onPointerCancel={releaseUp}
+              className={dpadButtonClass}
+            >
+              <ArrowUp className="size-4" />
+            </button>
+            <span aria-hidden />
+
+            <button
+              type="button"
+              aria-label="Move buddy left"
+              onPointerDown={pressLeft}
+              onPointerUp={releaseLeft}
+              onPointerLeave={releaseLeft}
+              onPointerCancel={releaseLeft}
+              className={dpadButtonClass}
+            >
+              <ArrowLeft className="size-4" />
+            </button>
+            <span aria-hidden />
+            <button
+              type="button"
+              aria-label="Move buddy right"
+              onPointerDown={pressRight}
+              onPointerUp={releaseRight}
+              onPointerLeave={releaseRight}
+              onPointerCancel={releaseRight}
+              className={dpadButtonClass}
+            >
+              <ArrowRight className="size-4" />
+            </button>
+
+            <span aria-hidden />
+            <button
+              type="button"
+              aria-label="Move buddy down"
+              onPointerDown={pressDown}
+              onPointerUp={releaseDown}
+              onPointerLeave={releaseDown}
+              onPointerCancel={releaseDown}
+              className={dpadButtonClass}
+            >
+              <ArrowDown className="size-4" />
+            </button>
+            <span aria-hidden />
+          </div>
+          <p className="text-sm text-muted-foreground">Press the arrow to make the buddy move</p>
+        </div>
+      )}
     </div>
   );
 }
