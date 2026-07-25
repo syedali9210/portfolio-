@@ -62,9 +62,14 @@ export default function Projects() {
             const isActive = activeSlug === project.slug;
 
             return (
-              <motion.div key={project.slug} layout transition={LAYOUT_TRANSITION}>
+              <motion.div
+                key={project.slug}
+                layout
+                transition={LAYOUT_TRANSITION}
+                className="border-b border-foreground/10 last:border-b-0"
+              >
                 {isActive ? (
-                  <motion.div layout="position" transition={LAYOUT_TRANSITION} className="flex flex-col gap-6 py-3">
+                  <motion.div layout="position" transition={LAYOUT_TRANSITION} className="flex flex-col gap-6 py-4">
                     <motion.p layout="position" transition={LAYOUT_TRANSITION} className="w-fit text-xl font-medium text-foreground">
                       {project.title}
                     </motion.p>
@@ -98,21 +103,25 @@ export default function Projects() {
                         </p>
                       </div>
 
-                      {project.caseStudy && (
-                        <Link
-                          href={`/projects/${project.slug}`}
-                          className="w-fit rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-80"
-                        >
-                          View Case Study
-                        </Link>
-                      )}
+                      {/* Pulled up out of the parent's gap-6 — sits closer to
+                          the description than the image/text spacing above it. */}
+                      <div className="-mt-3 flex flex-col gap-3">
+                        {project.caseStudy && (
+                          <Link
+                            href={`/projects/${project.slug}`}
+                            className="w-fit rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-80"
+                          >
+                            View Case Study
+                          </Link>
+                        )}
 
-                      {project.comingSoon && (
-                        <span className="flex w-fit items-center gap-1.5 rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background sm:hidden">
-                          <Lock className="size-3.5" />
-                          Coming soon
-                        </span>
-                      )}
+                        {project.comingSoon && (
+                          <span className="flex w-fit items-center gap-1.5 rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background sm:hidden">
+                            <Lock className="size-3.5" />
+                            Coming soon
+                          </span>
+                        )}
+                      </div>
                     </motion.div>
                   </motion.div>
                 ) : (
@@ -121,12 +130,12 @@ export default function Projects() {
                     transition={LAYOUT_TRANSITION}
                     type="button"
                     onClick={() => setActiveSlug(project.slug)}
-                    className="group flex w-full items-baseline justify-between gap-4 py-3 text-left"
+                    className="group flex w-full items-baseline justify-between gap-4 py-4 text-left"
                   >
                     <motion.span
                       layout="position"
                       transition={LAYOUT_TRANSITION}
-                      className="text-lg text-muted-foreground transition-colors group-hover:font-medium group-hover:text-foreground"
+                      className="text-lg text-foreground transition-[font-weight] group-hover:font-medium"
                     >
                       {project.title}
                     </motion.span>
