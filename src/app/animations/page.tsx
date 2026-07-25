@@ -12,11 +12,9 @@ export default function AnimationsGreeting() {
     <div className="mx-auto w-full max-w-[680px] px-4 py-16 sm:px-6">
       <section>
         <p className="text-[24px] font-medium tracking-tight text-foreground">Welcome 👋</p>
-        <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
-          This is where I keep the animations I&apos;ve rebuilt, recreated, or just couldn&apos;t stop
-          thinking about until I tried making them myself — starting back when I was glued to my desk
-          building this very portfolio. Everything below is real, live, and interactive: pick one to
-          see it in action.
+        <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+          Animations that nerd-sniped me until I rebuilt them, fueled by way too much cold coffee.
+          Poke around, it&apos;s all real.
         </p>
         <div className="mt-8">
           <PetBuddyGreeting text="Hii! 👋" size={130} />

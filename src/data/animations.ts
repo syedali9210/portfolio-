@@ -16,7 +16,7 @@ export interface AnimationEntry {
   // Optional full-page-only override — e.g. an interactive variant that
   // wouldn't make sense shrunk down inside a grid card.
   FullDemo?: ComponentType;
-  // One-line card-grid description.
+  // Short, funny, single-line card-grid blurb.
   blurb: string;
 }
 
@@ -29,42 +29,36 @@ export const ANIMATIONS: AnimationEntry[] = [
     name: "Maze Walk",
     Demo: PetBuddyPathHero,
     FullDemo: MazeWalkPlayable,
-    blurb:
-      "An isometric maze walkway where a pixel pet paces the centerline, chased by a cursor-following spotlight.",
+    blurb: "A pixel pet forever pacing an isometric maze.",
   },
   {
     id: "hello",
     name: "Hello",
     Demo: PetBuddyGreeting,
-    blurb:
-      "The same pixel pet, idling by a sign — a native web component that tracks your cursor and reaches out to it.",
+    blurb: "A tiny mascot way too hyped to see you.",
   },
   {
     id: "tab-hop",
     name: "Tab Hop",
     Demo: TabHopDemo,
-    blurb:
-      "A tab switcher where the mascot physically leaps to whichever tab you pick, squash and stretch included.",
+    blurb: "The mascot literally yeets itself between tabs.",
   },
   {
     id: "notch-card",
     name: "Info Notch Card",
     Demo: NotchCardDemo,
-    blurb:
-      "A MacBook-notch-styled info card that grows on hover to reveal contact links and an availability badge.",
+    blurb: "A MacBook notch moonlighting as a business card.",
   },
   {
     id: "scratch-card",
     name: "Scratch Card",
     Demo: ScratchCardDemo,
-    blurb:
-      "Scratch a foil surface off with a real canvas brush to reveal whatever's hiding underneath.",
+    blurb: "Scratch here. Yes, with your actual cursor.",
   },
   {
     id: "nav-scrubber",
     name: "Nav Scrubber",
     Demo: ScrubberCallout,
-    blurb:
-      "The drag-to-step scrubber powering this very page's own navigation, with a haptic buzz per step.",
+    blurb: "The nav you're dragging right now. Meta, huh?",
   },
 ];

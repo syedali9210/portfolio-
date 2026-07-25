@@ -41,7 +41,7 @@ function AnimationCard({ entry }: { entry: AnimationEntry }) {
 
       <div className="px-1 pb-1">
         <p className="text-base font-medium text-foreground">{entry.name}</p>
-        <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{entry.blurb}</p>
+        <p className="mt-1 truncate text-sm text-muted-foreground">{entry.blurb}</p>
       </div>
     </Link>
   );
