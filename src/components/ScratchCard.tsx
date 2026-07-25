@@ -27,7 +27,7 @@ const BRUSH_SIZE = 70;
 // the way out and the surface stops listening for more scratches, handing
 // pointer control to whatever `reveal` content sits underneath.
 const GRID = 16;
-const REVEAL_THRESHOLD = 0.7;
+const REVEAL_THRESHOLD = 0.85;
 
 const FOIL_SRC = "/images/scratch/foil-dots.png";
 const BRUSH_SRC = "/images/scratch/brush-grunge.png";
