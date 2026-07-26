@@ -16,7 +16,7 @@ const STICKER_TABS = [
     image: "/images/about/about-cats.jpg",
     rotation: -6,
     content:
-      "Certified cat person. Every street cat in the neighborhood gets head scratches on sight.",
+      "Certified cat guy. Every street cat near me knows they're getting head scratches, no debate.",
   },
   {
     value: "chill",
@@ -24,7 +24,7 @@ const STICKER_TABS = [
     image: "/images/about/about-chill.jpg",
     rotation: 4,
     content:
-      "A corner seat, the laptop, an iced coffee — allegedly work, mostly vibes.",
+      "Corner seat, laptop open, iced coffee in hand. Allegedly working, mostly just vibing.",
   },
   {
     value: "music",
@@ -32,7 +32,7 @@ const STICKER_TABS = [
     image: "/images/about/about-music.jpg",
     rotation: -3,
     content:
-      "Earphones on, world off. Every project has its own playlist.",
+      "Earphones in, world muted. Every project's basically got its own soundtrack.",
   },
   {
     value: "wild",
@@ -40,7 +40,7 @@ const STICKER_TABS = [
     image: "/images/about/about-wild.jpg",
     rotation: 7,
     content:
-      "Rare footage of me outside the desk setup. Spotted in a mirror, as usual.",
+      "Rare sighting of me outside my desk setup. Caught in a mirror, obviously.",
   },
 ];
 
@@ -84,13 +84,13 @@ export default function AboutMe() {
 
       <FadeIn className="screen-line-top screen-line-bottom mt-6 px-4 py-6 sm:px-6">
         <p className="text-base leading-relaxed text-muted-foreground">
-          An engineering student that somehow ended up in design. A product designer, UI/UX
-          designer, a design engineer... call me whatever you want.
+          Engineering student who somehow landed in design, lol. Product designer, UI/UX guy,
+          design engineer, whatever you wanna call me, i&apos;ll answer to it.
         </p>
         <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-          At the end of the day, I just like bringing ideas to life and shipping things that people
-          can actually use. Turns out watching something go from a random thought to a real product
-          is way more fun than it should be.
+          Honestly i just like taking an idea and actually shipping it, something people can use
+          for real. Watching a random 2am thought turn into an actual product hits different, way
+          more than it should.
         </p>
       </FadeIn>
 

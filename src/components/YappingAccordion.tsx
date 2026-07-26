@@ -9,19 +9,19 @@ import { ChevronsUpDownIcon } from "@/components/chevrons-up-down-icon";
 const ITEMS = [
   {
     n: "01",
-    text: "It all started when i saw an app banner. What began as making shapes turned into late night detailing over pixels.",
+    text: "It started when i saw some random app banner and just couldn't stop staring at it. Next thing i know i'm making shapes at 2am, fully nerd-sniped.",
   },
   {
     n: "02",
-    text: "In my second year, I realized design was never just Figma or Canva, it was about solving the pain points.",
+    text: "Second year hit and i realized design ain't just Figma or Canva, it's literally about fixing what's actually broken for people.",
   },
   {
     n: "03",
-    text: "Today, I solve user problems, build what I design, and almost every idea still begins with pen and paper.",
+    text: "Now i just solve problems, build what i design, and yeah, pen and paper still kicks off almost everything.",
   },
   {
     n: "04",
-    text: "When I'm not designing, I'm usually making animations in a café with music playing and a cold coffee beside me.",
+    text: "Not designing? Probably animating something in a café, earphones in, cold coffee on standby.",
   },
 ];
 

@@ -35,17 +35,17 @@ export default function MySpace() {
 
           <TabPanel value="blog-space" className="mt-6">
             <p className="text-base leading-relaxed text-muted-foreground">
-              From developing my own portfolio to making my own pet buddy like Claude, this idea came to
-              my mind while i was glued to my desk while making my portfolio with my earphones on.
+              So building this portfolio, glued to my desk, earphones in, i randomly got the idea to
+              make my own pet buddy, kinda like Claude&apos;s mascot but mine.
             </p>
             <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-              There are some hidden animations of the pet buddy across my portfolio, which you can see
-              while hovering over the elements.
+              There&apos;s hidden pet buddy animations scattered across the site too, hover over stuff
+              and you might catch one.
             </p>
             <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-              I want to make my pet buddy a completely banger pet buddy. The upcoming version of it will
-              have better interactions, animation, more texture and more feelings to it, stay tuned to
-              see the Pet Buddy coming fully alive :)
+              Ngl i wanna make this pet buddy a certified banger. Next version&apos;s getting better
+              interactions, more animation, more texture, more feelings, basically bringing it fully
+              alive. Stay tuned :)
             </p>
 
             <div className="mt-8 flex w-full items-center justify-center rounded-xl bg-card p-6 sm:p-10">
@@ -55,8 +55,8 @@ export default function MySpace() {
 
           <TabPanel value="archive" className="mt-6">
             <p className="mb-8 text-base leading-relaxed text-muted-foreground">
-              Welcome to the space where I keep on experimenting with things, anything and everything
-              will be put up in this area :)
+              Welcome to my little experiment zone, anything and everything ends up here
+              eventually :)
             </p>
             <div className="flex min-h-[320px] w-full flex-col items-center justify-center gap-6 rounded-xl p-6 text-center sm:min-h-[420px] sm:p-10">
               <div className="w-full max-w-[420px]">
@@ -72,7 +72,7 @@ export default function MySpace() {
                 />
               </div>
               <p className="max-w-lg text-base text-muted-foreground">
-                *Scratch the card to reveal it, then hover to see it in action.
+                *scratch the card to reveal it, then hover to watch it do its thing.
               </p>
             </div>
           </TabPanel>
