@@ -7,7 +7,13 @@ export default function AnimationSection({ entry }: { entry: AnimationEntry }) {
   const Demo = entry.FullDemo ?? entry.Demo;
 
   return (
-    <div className="fixed inset-0 flex flex-col">
+    // z-40 is load-bearing, not decorative: without an explicit z-index
+    // here, this wrapper paints in the implicit "z-index: auto" stacking
+    // tier, which loses to ANY sibling with a positive z-index — including
+    // ViewportEdgeBlur's fixed blur bands (z-30) in the root layout. No
+    // z-index on a descendant (e.g. the restart button) can ever escape
+    // that; the ancestor itself has to out-rank it.
+    <div className="fixed inset-0 z-40 flex flex-col">
       {/* Always available regardless of AnimationsChrome's hide-nav toggle
           — without this, hiding the chrome would strand you on a fullscreen
           demo with no way back to the animations grid. */}

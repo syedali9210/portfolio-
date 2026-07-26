@@ -33,14 +33,17 @@ export default function AnimationStage({
         aria-label="Restart animation"
         title="Restart animation"
         className={cn(
-          "absolute z-10 flex shrink-0 items-center justify-center text-muted-foreground shadow-[var(--shadow-2)] transition-colors hover:bg-muted hover:text-foreground",
+          "absolute flex shrink-0 items-center justify-center text-muted-foreground shadow-[var(--shadow-2)] transition-colors hover:bg-muted hover:text-foreground",
           fullscreen
             ? // Beside AnimationsChrome's hide-nav toggle — top-right on
               // mobile (AnimationsMobileNav owns the bottom row there),
               // bottom-right from sm up (AnimationsSwitch owns top-right
-              // at that size, AnimationsMobileNav is gone).
-              "top-4 right-16 size-9 rounded-full bg-card/80 backdrop-blur sm:top-auto sm:right-20 sm:bottom-6"
-            : "top-3 right-3 size-7 rounded-md bg-card"
+              // at that size, AnimationsMobileNav is gone). z-50 (not the
+              // z-10 the card variant uses) so it sits above
+              // ViewportEdgeBlur's fixed blur bands (z-30) instead of
+              // rendering underneath/blurred by them.
+              "top-4 right-16 z-50 size-9 rounded-full bg-card/80 backdrop-blur sm:top-auto sm:right-20 sm:bottom-6"
+            : "top-3 right-3 z-10 size-7 rounded-md bg-card"
         )}
       >
         <RotateCcw className={fullscreen ? "size-4" : "size-3.5"} />
