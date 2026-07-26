@@ -99,9 +99,23 @@ function SolutionRow({
       </div>
 
       <div className={`grid w-full grid-cols-1 gap-4 ${gridCols}`}>
+        {/* Source crops are small, oddly-shaped UI snippets (dashboards,
+            badges, strips) — object-cover into a fixed 16:9 box was
+            cropping and upscaling them into an unreadable zoomed-in mess.
+            object-contain shows the whole crop at its own aspect ratio,
+            letterboxed on the card's own dark background instead. */}
         {solution.images.map((img) => (
-          <div key={img.src} className="relative aspect-video w-full overflow-hidden rounded-lg">
-            <Image src={img.src} alt={img.alt ?? ""} fill sizes="(min-width: 1024px) 800px, 100vw" className="object-cover" />
+          <div
+            key={img.src}
+            className="relative aspect-video w-full overflow-hidden rounded-lg bg-[#1f1f1f]"
+          >
+            <Image
+              src={img.src}
+              alt={img.alt ?? ""}
+              fill
+              sizes="(min-width: 1024px) 800px, 100vw"
+              className="object-contain"
+            />
           </div>
         ))}
       </div>
