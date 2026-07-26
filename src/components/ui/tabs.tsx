@@ -199,7 +199,7 @@ const TabsList = forwardRef<HTMLDivElement, TabsListProps>(
       [registerItem]
     );
 
-    useEffect(() => {
+    useLayoutEffect(() => {
       measureItems();
     }, [measureItems, children]);
 
@@ -421,7 +421,12 @@ const TabItem = forwardRef<HTMLButtonElement, TabItemProps>(
     const internalRef = useRef<HTMLButtonElement>(null);
     const { registerTab, hoveredIndex, selectedValue, setOptimisticIdx } = useTabsList();
 
-    useEffect(() => {
+    // Layout effect (not effect): TabsList measures registered items in its
+    // own layout effect right after, and child layout effects run before a
+    // parent's — registering here first means the very first paint already
+    // has the selected-tab indicator positioned, instead of one paint with
+    // no indicator followed by it popping in a frame later.
+    useLayoutEffect(() => {
       registerTab(_index, value, internalRef.current);
       return () => registerTab(_index, value, null);
     }, [_index, value, registerTab]);
