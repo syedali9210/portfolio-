@@ -80,8 +80,21 @@ export default function Projects() {
                       transition={{ duration: 0.35, ease: EASE, delay: 0.15 }}
                       className="flex flex-col gap-6"
                     >
-                      {project.image && (
-                        <div className="group/hero relative aspect-video w-full overflow-hidden rounded-xl bg-[#1f1f1f]">
+                      {project.image && (project.caseStudy && !project.comingSoon ? (
+                        <Link
+                          href={`/projects/${project.slug}`}
+                          className="group/hero relative aspect-video w-full overflow-hidden rounded-xl bg-transparent transition-opacity hover:opacity-80"
+                        >
+                          <Image
+                            src={project.image}
+                            alt={`${project.title} screenshot`}
+                            fill
+                            sizes="(min-width: 640px) 680px, 100vw"
+                            className="object-cover object-top"
+                          />
+                        </Link>
+                      ) : (
+                        <div className="group/hero relative aspect-video w-full overflow-hidden rounded-xl bg-transparent">
                           <Image
                             src={project.image}
                             alt={`${project.title} screenshot`}
@@ -94,7 +107,7 @@ export default function Projects() {
                           />
                           {project.comingSoon && <ComingSoonCursorTag />}
                         </div>
-                      )}
+                      ))}
 
                       <div className="flex flex-col gap-2">
                         <p className="text-base font-medium text-foreground">{project.tag}</p>
