@@ -1,18 +1,64 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { motion } from "motion/react";
+
+const ACCENT = "#db744f";
+const SPRING = { type: "spring" as const, bounce: 0.25, duration: 0.35 };
 
 export type ScrubberItem = {
   id: string;
   label: string;
 };
 
-const TICK_COUNT = 32;
+// Hoisted to module scope on purpose: a fresh function identity per render
+// would remount every row instead of updating it in place, so `animate`
+// would restart from its initial value each time (see AnimationsNavRail's
+// `Row` for the fuller version of this note).
+function Row({
+  item,
+  isHighlighted,
+  onSelect,
+  onHoverStart,
+  onHoverEnd,
+}: {
+  item: ScrubberItem;
+  isHighlighted: boolean;
+  onSelect: (id: string) => void;
+  onHoverStart: (id: string) => void;
+  onHoverEnd: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(item.id)}
+      onMouseEnter={() => onHoverStart(item.id)}
+      onMouseLeave={onHoverEnd}
+      className="flex items-center gap-2 py-0.5 text-left outline-none focus-visible:opacity-70"
+    >
+      <motion.span
+        animate={{ width: isHighlighted ? 22 : 10, backgroundColor: isHighlighted ? ACCENT : "var(--color-foreground)" }}
+        transition={SPRING}
+        className="h-px shrink-0 rounded-full"
+      />
+      <motion.span
+        animate={{ x: isHighlighted ? 4 : 0, color: isHighlighted ? ACCENT : "var(--color-muted-foreground)" }}
+        transition={SPRING}
+        className="text-[13px] whitespace-nowrap"
+      >
+        {item.label}
+      </motion.span>
+    </button>
+  );
+}
 
+// Same visual language as AnimationsNavRail (line+label rows, terracotta
+// highlight) — but driven by scroll position within a single page
+// (IntersectionObserver over same-page sections) instead of the current
+// route, since these items are anchors, not pages.
 export default function Scrubber({ items }: { items: ScrubberItem[] }) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const trackRef = useRef<HTMLDivElement>(null);
-  const draggingRef = useRef(false);
+  const [hovered, setHovered] = useState<string | null>(null);
 
   useEffect(() => {
     if (!items.length) return;
@@ -23,7 +69,6 @@ export default function Scrubber({ items }: { items: ScrubberItem[] }) {
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (draggingRef.current) return;
         const visible = entries.filter((e) => e.isIntersecting);
         if (visible.length) {
           const idx = items.findIndex((item) => item.id === visible[0].target.id);
@@ -39,92 +84,27 @@ export default function Scrubber({ items }: { items: ScrubberItem[] }) {
 
   if (!items.length) return null;
 
-  const active = items[activeIndex];
+  const activeKey = items[activeIndex].id;
+  const highlightKey = hovered ?? activeKey;
 
-  function indexFromClientY(clientY: number) {
-    const track = trackRef.current;
-    if (!track) return activeIndex;
-    const rect = track.getBoundingClientRect();
-    const ratio = Math.min(1, Math.max(0, (clientY - rect.top) / rect.height));
-    return Math.round(ratio * (items.length - 1));
+  function handleSelect(id: string) {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
-
-  function goToIndex(idx: number, behavior: ScrollBehavior) {
-    setActiveIndex(idx);
-    document.getElementById(items[idx].id)?.scrollIntoView({ behavior, block: "start" });
-  }
-
-  function handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
-    draggingRef.current = true;
-    try {
-      trackRef.current?.setPointerCapture(e.pointerId);
-    } catch {
-      // Synthetic/unsupported pointer id — dragging still works via move events.
-    }
-    goToIndex(indexFromClientY(e.clientY), "smooth");
-  }
-
-  function handlePointerMove(e: React.PointerEvent<HTMLDivElement>) {
-    if (!draggingRef.current) return;
-    const idx = indexFromClientY(e.clientY);
-    if (idx !== activeIndex) goToIndex(idx, "smooth");
-  }
-
-  function handlePointerUp(e: React.PointerEvent<HTMLDivElement>) {
-    draggingRef.current = false;
-    try {
-      trackRef.current?.releasePointerCapture(e.pointerId);
-    } catch {
-      // No-op if capture was never established.
-    }
-  }
-
-  const playheadPercent = items.length > 1 ? (activeIndex / (items.length - 1)) * 100 : 0;
 
   return (
-    <div className="fixed left-8 top-1/2 z-40 hidden -translate-y-1/2 lg:block">
-      <div className="relative">
-        <div
-          ref={trackRef}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerCancel={handlePointerUp}
-          role="slider"
-          aria-orientation="vertical"
-          aria-label="Section navigation"
-          aria-valuemin={0}
-          aria-valuemax={items.length - 1}
-          aria-valuenow={activeIndex}
-          aria-valuetext={active.label}
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === "ArrowDown") goToIndex(Math.min(items.length - 1, activeIndex + 1), "smooth");
-            if (e.key === "ArrowUp") goToIndex(Math.max(0, activeIndex - 1), "smooth");
-          }}
-          className="relative flex h-64 w-8 cursor-pointer touch-none flex-col items-center rounded-full border border-border bg-card py-3 outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        >
-          {/* The tick strip is the positioning context so 0%/100% land on the
-              first/last tick instead of overshooting into the pill's padding. */}
-          <div className="relative flex h-full w-full flex-col items-center justify-between">
-            {Array.from({ length: TICK_COUNT }).map((_, i) => (
-              <span key={i} className="h-px w-3 shrink-0 bg-muted-foreground/30" />
-            ))}
-            {/* Playhead in the pet buddy's terracotta */}
-            <div
-              className="pointer-events-none absolute left-1/2 h-1 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#db744f] transition-[top] duration-300 ease-out"
-              style={{ top: `${playheadPercent}%` }}
-            />
-          </div>
-        </div>
-
-        <div
-          className="pointer-events-none absolute left-full ml-3 -translate-y-1/2 whitespace-nowrap rounded-lg border border-border bg-card px-3 py-1.5 font-mono text-[13px] text-muted-foreground shadow-lg transition-[top] duration-300 ease-out"
-          style={{ top: `calc(12px + (100% - 24px) * ${playheadPercent / 100})` }}
-        >
-          {active.label}
-        </div>
+    <nav aria-label="Section navigation" className="fixed left-8 top-1/2 z-40 hidden -translate-y-1/2 lg:block">
+      <div className="flex flex-col gap-1">
+        {items.map((item) => (
+          <Row
+            key={item.id}
+            item={item}
+            isHighlighted={item.id === highlightKey}
+            onSelect={handleSelect}
+            onHoverStart={setHovered}
+            onHoverEnd={() => setHovered(null)}
+          />
+        ))}
       </div>
-    </div>
+    </nav>
   );
 }
