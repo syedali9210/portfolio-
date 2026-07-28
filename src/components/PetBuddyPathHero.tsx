@@ -3,6 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 /**
  * Ported from the standalone "pet buddy hero" reference (index.html): an
@@ -295,15 +296,21 @@ export default function PetBuddyPathHero({ interactive = false }: { interactive?
   // an isometric character to only respond to the key that matches the
   // corridor it's currently walking.
   const heldKeysRef = useRef<Set<string>>(new Set());
+  // Render-visible mirror of the ref above, purely so the d-pad can light up
+  // the direction currently being held. The ref stays the source of truth for
+  // the rAF loop (which must not depend on React's render timing); this only
+  // has to keep up with the eye, and arrow presses are far too infrequent for
+  // the extra renders to matter.
+  const [heldKeys, setHeldKeys] = useState<string[]>([]);
 
-  const pressUp = () => heldKeysRef.current.add("ArrowUp");
-  const releaseUp = () => heldKeysRef.current.delete("ArrowUp");
-  const pressDown = () => heldKeysRef.current.add("ArrowDown");
-  const releaseDown = () => heldKeysRef.current.delete("ArrowDown");
-  const pressLeft = () => heldKeysRef.current.add("ArrowLeft");
-  const releaseLeft = () => heldKeysRef.current.delete("ArrowLeft");
-  const pressRight = () => heldKeysRef.current.add("ArrowRight");
-  const releaseRight = () => heldKeysRef.current.delete("ArrowRight");
+  const press = (key: string) => {
+    heldKeysRef.current.add(key);
+    setHeldKeys((keys) => (keys.includes(key) ? keys : [...keys, key]));
+  };
+  const release = (key: string) => {
+    heldKeysRef.current.delete(key);
+    setHeldKeys((keys) => keys.filter((k) => k !== key));
+  };
 
   // Drives both the JSX-level entrance springs (pieces/lines/buddy) and the
   // imperative walk-loop delay below — a single source of truth so an OS
@@ -389,14 +396,19 @@ export default function PetBuddyPathHero({ interactive = false }: { interactive?
       target instanceof HTMLElement && (target.tagName === "INPUT" || target.tagName === "TEXTAREA");
     const ARROW_KEYS = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"]);
 
+    // Mirrors into `heldKeys` state as well as the ref so the on-screen d-pad
+    // lights up under keyboard control, not just under pointer presses (which
+    // get :active for free). setState is stable, so this needs no extra deps.
     const onKeyDown = (e: KeyboardEvent) => {
       if (isTypingTarget(e.target) || !ARROW_KEYS.has(e.key)) return;
       heldKeysRef.current.add(e.key);
+      setHeldKeys((keys) => (keys.includes(e.key) ? keys : [...keys, e.key]));
       e.preventDefault();
     };
     const onKeyUp = (e: KeyboardEvent) => {
       if (!ARROW_KEYS.has(e.key)) return;
       heldKeysRef.current.delete(e.key);
+      setHeldKeys((keys) => keys.filter((k) => k !== e.key));
     };
     if (interactive) {
       window.addEventListener("keydown", onKeyDown);
@@ -601,8 +613,15 @@ export default function PetBuddyPathHero({ interactive = false }: { interactive?
     };
   }, [interactive, prefersReducedMotion]);
 
-  const dpadButtonClass =
-    "flex size-10 items-center justify-center rounded-lg bg-card text-muted-foreground shadow-[var(--shadow-2)] transition-colors select-none touch-none hover:bg-muted hover:text-foreground active:bg-muted active:text-foreground";
+  // Held state is driven off `heldKeys` rather than CSS :active so the pad
+  // reads the same whether the input was a click or the matching arrow key.
+  const dpadButtonClass = (key: string) =>
+    cn(
+      "flex size-10 items-center justify-center rounded-lg shadow-[var(--shadow-2)] transition-colors select-none touch-none",
+      heldKeys.includes(key)
+        ? "bg-muted text-foreground"
+        : "bg-card text-muted-foreground hover:bg-muted hover:text-foreground"
+    );
 
   return (
     <div className="relative mx-auto flex w-full max-w-[680px] flex-col items-center gap-6">
@@ -800,20 +819,22 @@ export default function PetBuddyPathHero({ interactive = false }: { interactive?
       </svg>
 
       {interactive && (
-        // Desktop relies on arrow keys (see the keydown listener above) —
-        // this on-screen d-pad is the touch/tablet equivalent, hidden once
-        // a keyboard is the expected input.
-        <div className="flex flex-col items-center gap-3 lg:hidden">
+        // Shown at every size: on touch it's the only way to steer, and on
+        // desktop it doubles as the readout for the arrow keys — the held
+        // direction lights up whichever way you drove it, so the pad also
+        // answers "is this key doing anything?" on segments where the buddy
+        // legitimately ignores an arrow that doesn't match the corridor.
+        <div className="flex flex-col items-center gap-3">
           <div className="grid grid-cols-3 grid-rows-3 gap-1.5">
             <span aria-hidden />
             <button
               type="button"
               aria-label="Move buddy up"
-              onPointerDown={pressUp}
-              onPointerUp={releaseUp}
-              onPointerLeave={releaseUp}
-              onPointerCancel={releaseUp}
-              className={dpadButtonClass}
+              onPointerDown={() => press("ArrowUp")}
+              onPointerUp={() => release("ArrowUp")}
+              onPointerLeave={() => release("ArrowUp")}
+              onPointerCancel={() => release("ArrowUp")}
+              className={dpadButtonClass("ArrowUp")}
             >
               <ArrowUp className="size-4" />
             </button>
@@ -822,11 +843,11 @@ export default function PetBuddyPathHero({ interactive = false }: { interactive?
             <button
               type="button"
               aria-label="Move buddy left"
-              onPointerDown={pressLeft}
-              onPointerUp={releaseLeft}
-              onPointerLeave={releaseLeft}
-              onPointerCancel={releaseLeft}
-              className={dpadButtonClass}
+              onPointerDown={() => press("ArrowLeft")}
+              onPointerUp={() => release("ArrowLeft")}
+              onPointerLeave={() => release("ArrowLeft")}
+              onPointerCancel={() => release("ArrowLeft")}
+              className={dpadButtonClass("ArrowLeft")}
             >
               <ArrowLeft className="size-4" />
             </button>
@@ -834,11 +855,11 @@ export default function PetBuddyPathHero({ interactive = false }: { interactive?
             <button
               type="button"
               aria-label="Move buddy right"
-              onPointerDown={pressRight}
-              onPointerUp={releaseRight}
-              onPointerLeave={releaseRight}
-              onPointerCancel={releaseRight}
-              className={dpadButtonClass}
+              onPointerDown={() => press("ArrowRight")}
+              onPointerUp={() => release("ArrowRight")}
+              onPointerLeave={() => release("ArrowRight")}
+              onPointerCancel={() => release("ArrowRight")}
+              className={dpadButtonClass("ArrowRight")}
             >
               <ArrowRight className="size-4" />
             </button>
@@ -847,27 +868,23 @@ export default function PetBuddyPathHero({ interactive = false }: { interactive?
             <button
               type="button"
               aria-label="Move buddy down"
-              onPointerDown={pressDown}
-              onPointerUp={releaseDown}
-              onPointerLeave={releaseDown}
-              onPointerCancel={releaseDown}
-              className={dpadButtonClass}
+              onPointerDown={() => press("ArrowDown")}
+              onPointerUp={() => release("ArrowDown")}
+              onPointerLeave={() => release("ArrowDown")}
+              onPointerCancel={() => release("ArrowDown")}
+              className={dpadButtonClass("ArrowDown")}
             >
               <ArrowDown className="size-4" />
             </button>
             <span aria-hidden />
           </div>
-          <p className="text-sm text-muted-foreground">Press the arrow to make the buddy move</p>
+          <p className="text-sm text-muted-foreground lg:hidden">
+            Press the arrows to make the buddy move
+          </p>
+          <p className="hidden text-sm text-muted-foreground lg:block">
+            Use the arrow keys — or click the pad — to make the buddy move
+          </p>
         </div>
-      )}
-
-      {interactive && (
-        // Desktop counterpart to the d-pad's hint text above — hidden
-        // below lg since that's where the d-pad (and its own hint) takes
-        // over instead of the keyboard.
-        <p className="hidden text-sm text-muted-foreground lg:block">
-          Use the arrow to make the buddy move
-        </p>
       )}
     </div>
   );
