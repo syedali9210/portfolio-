@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Briefcase, Sparkles } from "lucide-react";
+import { Briefcase } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Elevated } from "@/lib/elevated";
+import LogoMarkIcon from "@/components/icons/LogoMarkIcon";
 
 const OPTIONS = [
-  { id: "portfolio", href: "/", label: "Portfolio", icon: Briefcase },
-  { id: "animations", href: "/animations", label: "Animations", icon: Sparkles },
+  { id: "portfolio", href: "/", label: "Portfolio" },
+  { id: "animations", href: "/animations", label: "Animations" },
 ] as const;
 
 /**
@@ -25,7 +26,6 @@ export default function AnimationsSwitch() {
     <div className="fixed top-3 right-4 z-50 hidden sm:block">
       <Elevated offset={2} className="flex items-center gap-0.5 rounded-full p-1">
         {OPTIONS.map((opt) => {
-          const Icon = opt.icon;
           const isActive = activeId === opt.id;
           return (
             <Link
@@ -38,7 +38,11 @@ export default function AnimationsSwitch() {
                 isActive ? "bg-muted text-foreground" : "text-muted-foreground"
               )}
             >
-              <Icon size={16} strokeWidth={isActive ? 2 : 1.5} />
+              {opt.id === "animations" ? (
+                <LogoMarkIcon className="size-4" />
+              ) : (
+                <Briefcase size={16} strokeWidth={isActive ? 2 : 1.5} />
+              )}
             </Link>
           );
         })}

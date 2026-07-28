@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Briefcase, Sparkles } from "lucide-react";
+import { Briefcase } from "lucide-react";
 import { Elevated } from "@/lib/elevated";
+import LogoMarkIcon from "@/components/icons/LogoMarkIcon";
 
 /**
  * Mobile/tablet-only switch between the portfolio and the animations
@@ -20,7 +21,6 @@ import { Elevated } from "@/lib/elevated";
 export default function PageSwitchTab() {
   const pathname = usePathname();
   const onAnimations = pathname?.startsWith("/animations") ?? false;
-  const Icon = onAnimations ? Briefcase : Sparkles;
   const href = onAnimations ? "/" : "/animations";
   const label = onAnimations ? "Switch to portfolio" : "Switch to animations";
 
@@ -32,7 +32,7 @@ export default function PageSwitchTab() {
         title={label}
         className="flex size-11 items-center justify-center rounded-full text-foreground"
       >
-        <Icon size={18} strokeWidth={1.75} />
+        {onAnimations ? <Briefcase size={18} strokeWidth={1.75} /> : <LogoMarkIcon className="size-[18px]" />}
       </Link>
     </Elevated>
   );
