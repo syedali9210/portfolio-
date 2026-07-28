@@ -1,6 +1,7 @@
 "use client";
 
-import { useLayoutEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { motion, useReducedMotion } from "motion/react";
 import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from "lucide-react";
 
 /**
@@ -15,6 +16,13 @@ import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from "lucide-react";
  * tokens (matching Hero's dock/screenshot card color) so it adapts in light
  * mode; the pet's own body colors stay fixed — it's the same character
  * regardless of theme, same as the terracotta accent used elsewhere.
+ *
+ * On mount, the walkway assembles itself instead of just appearing: one
+ * slab per straight leg of the zigzag falls from above and settles into
+ * place, cascading along the path; the dashed guide rays draw themselves
+ * in over the same window; and only once that's landed does the buddy drop
+ * in and start its ambient walk — see the timing constants, the entrance
+ * geometry block, and PathPiece/GuideLine below.
  */
 
 const PET_BODY = "#db744f";
@@ -60,6 +68,83 @@ function inPoly(p: [number, number], poly: [number, number][]) {
 }
 const inUnion = (p: [number, number]) => inPoly(p, MAIN) || inPoly(p, STRIP);
 
+/* ---- entrance geometry: one falling slab per straight run ----------------
+   The walkway is a zigzag of straight isometric legs, so it assembles from
+   one piece per leg rather than from arbitrary horizontal slices: every cut
+   lands exactly on a corner, and a straight stretch always drops as a single
+   block. Each piece's clip region is a quad bounded lengthwise by the two
+   corner cuts and laterally by PIECE_HALF_W. */
+
+type Vec = [number, number];
+const vAdd = (a: Vec, b: Vec): Vec => [a[0] + b[0], a[1] + b[1]];
+const vSub = (a: Vec, b: Vec): Vec => [a[0] - b[0], a[1] - b[1]];
+const vMul = (a: Vec, k: number): Vec => [a[0] * k, a[1] * k];
+const vDot = (a: Vec, b: Vec) => a[0] * b[0] + a[1] * b[1];
+const vNorm = (a: Vec): Vec => {
+  const len = Math.hypot(a[0], a[1]) || 1;
+  return [a[0] / len, a[1] / len];
+};
+const vPerp = (a: Vec): Vec => [-a[1], a[0]];
+
+// Perpendicular reach of a piece's clip region. Has to clear the walkway
+// surface (~19 out from the centerline) plus the extruded side walls, while
+// staying well short of the next leg of the zigzag — the closest two legs
+// ever run parallel is ~104 apart, so two regions at 38 can never collide.
+const PIECE_HALF_W = 38;
+// How far the first/last piece reaches past the ends of the centerline, so
+// the walkway's end caps (and the detached STRIP quad, which sits just
+// behind the first waypoint) still travel with a piece.
+const PIECE_END_CAP = 70;
+
+const SEG_DIRS: Vec[] = WPTS.slice(0, -1).map((p, i) => vNorm(vSub(WPTS[i + 1], p)));
+
+// Cut direction at each waypoint — the bisector of the two legs meeting
+// there, i.e. the mitre seam the artwork's own corner is already built on.
+// Both neighbours derive their shared edge from this one vector, so pieces
+// tile back together with neither a gap nor a double-drawn overlap.
+const CUT_DIRS: Vec[] = WPTS.map((_, j) => {
+  if (j === 0) return vPerp(SEG_DIRS[0]);
+  if (j === SEG_DIRS.length) return vPerp(SEG_DIRS[SEG_DIRS.length - 1]);
+  return vNorm(vAdd(vPerp(SEG_DIRS[j - 1]), vPerp(SEG_DIRS[j])));
+});
+
+const PIECE_CLIPS: string[] = SEG_DIRS.map((u, i) => {
+  const normal = vPerp(u);
+  const last = SEG_DIRS.length - 1;
+  const startCut = CUT_DIRS[i];
+  const endCut = CUT_DIRS[i + 1];
+  const start = i === 0 ? vSub(WPTS[0], vMul(u, PIECE_END_CAP)) : (WPTS[i] as Vec);
+  const end = i === last ? vAdd(WPTS[i + 1], vMul(u, PIECE_END_CAP)) : (WPTS[i + 1] as Vec);
+  // Dividing by the cut's alignment with this leg's normal is the mitre
+  // extension: it keeps the region's *perpendicular* half-width at exactly
+  // PIECE_HALF_W even where a cut runs oblique through a sharp corner.
+  const startReach = PIECE_HALF_W / vDot(startCut, normal);
+  const endReach = PIECE_HALF_W / vDot(endCut, normal);
+  return [
+    vAdd(start, vMul(startCut, startReach)),
+    vAdd(end, vMul(endCut, endReach)),
+    vSub(end, vMul(endCut, endReach)),
+    vSub(start, vMul(startCut, startReach)),
+  ]
+    .map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`)
+    .join(" ");
+});
+
+// Entrance choreography timings (seconds unless noted). Kept as named
+// constants because the imperative walk-loop start (in the effect below)
+// has to line up with the JSX-driven spring transitions here.
+const PIECE_DROP_PX = 170;
+const PIECE_STAGGER = 0.055;
+const PIECE_DURATION = 0.5;
+const PIECE_BOUNCE = 0.32;
+const LINES_DELAY = 0.08;
+const LINES_DURATION = 0.7;
+const BUDDY_DROP_DELAY = 0.92;
+const BUDDY_DROP_DURATION = 0.45;
+const BUDDY_DROP_BOUNCE = 0.4;
+const BUDDY_DROP_PX = 90;
+const WALK_START_MS = (BUDDY_DROP_DELAY + BUDDY_DROP_DURATION) * 1000;
+
 // Wall-quad path data (the hatched slab-depth strips along bottom-facing
 // edges) — pure geometry derived from MAIN/STRIP/DEPTH, identical on every
 // mount, so it's computed once here instead of re-walking every edge with
@@ -101,6 +186,80 @@ const WALL_QUADS: string[] = (() => {
   });
   return quads;
 })();
+
+const ENTRANCE_EASE = [0.22, 1, 0.36, 1] as const;
+
+// One falling leg of the walkway. Every piece <use>s the same single copy of
+// the artwork (#pbh-walkway, in defs) and differs only by which corner-to-
+// corner region it clips to — so the pieces are guaranteed to reassemble
+// into the original drawing exactly, with no per-piece geometry to keep in
+// sync. clip-path is evaluated in the element's own coordinate system, so it
+// travels with the group's transform rather than acting as a fixed wipe
+// window: a piece keeps showing its whole leg the entire way down.
+function PathPiece({
+  index,
+  reduceMotion,
+  mounted,
+}: {
+  index: number;
+  reduceMotion: boolean;
+  mounted: boolean;
+}) {
+  const landed = reduceMotion || mounted;
+  return (
+    <motion.g
+      clipPath={`url(#pbh-piece-${index})`}
+      initial={{ y: -PIECE_DROP_PX, opacity: 0 }}
+      animate={landed ? { y: 0, opacity: 1 } : { y: -PIECE_DROP_PX, opacity: 0 }}
+      transition={
+        reduceMotion
+          ? { duration: 0 }
+          : { type: "spring", bounce: PIECE_BOUNCE, duration: PIECE_DURATION, delay: index * PIECE_STAGGER }
+      }
+    >
+      <use href="#pbh-walkway" />
+    </motion.g>
+  );
+}
+
+// A dashed guide ray that draws itself in on mount, then hands back off to
+// a plain static dash pattern once settled — pathLength take over
+// stroke-dasharray/dashoffset while animating (which is how the draw-in is
+// achieved), so the "12 12" resting look is restored afterward by simply
+// rendering a plain line instead of continuing to fight motion for control
+// of those attributes.
+function GuideLine({
+  x1, y1, x2, y2, reduceMotion, mounted,
+}: {
+  x1: number; y1: number; x2: number; y2: number; reduceMotion: boolean; mounted: boolean;
+}) {
+  // Flipped by the draw-in's own completion callback rather than a matching
+  // timer, so the swap back to the dashed resting line can never drift out
+  // of sync with the animation that precedes it.
+  const [drawn, setDrawn] = useState(false);
+
+  if (reduceMotion || drawn) {
+    return <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={STROKE} strokeWidth="0.5" strokeDasharray="12 12" />;
+  }
+  return (
+    <motion.line
+      x1={x1}
+      y1={y1}
+      x2={x2}
+      y2={y2}
+      stroke={STROKE}
+      strokeWidth="0.5"
+      initial={{ pathLength: 0 }}
+      animate={{ pathLength: mounted ? 1 : 0 }}
+      transition={{ duration: LINES_DURATION, delay: LINES_DELAY, ease: ENTRANCE_EASE }}
+      // The pre-mount `pathLength: 0 -> 0` pass also "completes"; only the
+      // real draw (which can only run once mounted is true) should settle.
+      onAnimationComplete={() => {
+        if (mounted) setDrawn(true);
+      }}
+    />
+  );
+}
 
 // Playable on /animations/maze-walk: `interactive` disables the ambient
 // back-and-forth pacing and hands direction control to the caller — arrow
@@ -146,6 +305,28 @@ export default function PetBuddyPathHero({ interactive = false }: { interactive?
   const pressRight = () => heldKeysRef.current.add("ArrowRight");
   const releaseRight = () => heldKeysRef.current.delete("ArrowRight");
 
+  // Drives both the JSX-level entrance springs (pieces/lines/buddy) and the
+  // imperative walk-loop delay below — a single source of truth so an OS
+  // "reduce motion" preference skips the whole choreography and lands
+  // everything in its resting state immediately, matching the ambient
+  // walk's own existing reduced-motion behavior.
+  const prefersReducedMotion = useReducedMotion();
+
+  // This whole subtree sits inside PageTransition's
+  // `<AnimatePresence initial={false}>`, and that flag rides React context
+  // down to *every* descendant motion component — not just AnimatePresence's
+  // own children — telling each one to skip its mount animation and render
+  // straight at `animate`. So an entrance written as plain initial->animate
+  // silently never plays here. Flipping a flag one render after hydration
+  // turns it into an ordinary state change on an already-mounted element,
+  // which Motion does animate. The extra render is the entire point of the
+  // effect, so the cascading-render lint rule doesn't apply.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- deliberate post-hydration flip; see above
+    setMounted(true);
+  }, []);
+
   useLayoutEffect(() => {
     const svg = svgRef.current;
     const wallsEl = wallsRef.current;
@@ -163,24 +344,12 @@ export default function PetBuddyPathHero({ interactive = false }: { interactive?
       return;
     }
 
-    const svgNS = "http://www.w3.org/2000/svg";
-
-    // Slab depth: extruded hatched side walls, visible only where the region
-    // just below an edge is outside the walkway (bottom-facing edges). Path
-    // data itself is precomputed in WALL_QUADS above — this just builds the
-    // DOM nodes for this instance.
-    WALL_QUADS.forEach((d) => {
-      const q = document.createElementNS(svgNS, "path");
-      q.setAttribute("d", d);
-      q.setAttribute("fill", "url(#pbh-hatch)");
-      q.setAttribute("stroke", STROKE);
-      q.setAttribute("stroke-width", "0.75");
-      wallsEl.appendChild(q);
-    });
-
     // Cursor spotlight: orange stroke-only copies of every path edge,
-    // visible only inside the radial mask that follows the pointer.
-    wallsEl.querySelectorAll("path").forEach((p) => {
+    // visible only inside the radial mask that follows the pointer. Cloned
+    // from the shared #pbh-walkway definition rather than from the rendered
+    // pieces — the pieces are all <use> references to it, so this is the
+    // only place the real path elements exist (and each shape appears once).
+    svg.querySelectorAll("#pbh-walkway path.pbh-wall-quad").forEach((p) => {
       const c = p.cloneNode() as SVGPathElement;
       c.setAttribute("fill", "none");
       c.setAttribute("stroke", PET_BODY);
@@ -233,8 +402,6 @@ export default function PetBuddyPathHero({ interactive = false }: { interactive?
       window.addEventListener("keydown", onKeyDown);
       window.addEventListener("keyup", onKeyUp);
     }
-
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const segs: { x0: number; y0: number; x1: number; y1: number; len: number; start: number }[] = [];
     let total = 0;
@@ -292,6 +459,7 @@ export default function PetBuddyPathHero({ interactive = false }: { interactive?
     let last = performance.now();
     let raf = 0;
     let restTimer: ReturnType<typeof setTimeout> | null = null;
+    let walkStartTimer: ReturnType<typeof setTimeout> | null = null;
 
     function pose() {
       let idx = segs.findIndex((s) => travelled >= s.start && travelled <= s.start + s.len);
@@ -402,20 +570,28 @@ export default function PetBuddyPathHero({ interactive = false }: { interactive?
 
     if (interactive) paused = true; // idle, standing still until a key/button is held
 
-    if (reduce && !interactive) {
-      travelled = total * 0.42;
-      render(pose(), performance.now());
-    } else {
-      render(pose(), performance.now());
+    // Render the resting pose immediately (so there's never a blank/T-pose
+    // frame), but hold off starting the rAF walk loop until the buddy's own
+    // drop-in has actually landed — walking while still invisible (or
+    // mid-fall) would read as broken rather than sequenced.
+    render(pose(), performance.now());
+    if (prefersReducedMotion) {
       raf = requestAnimationFrame(frame);
+    } else {
+      walkStartTimer = setTimeout(() => {
+        last = performance.now();
+        raf = requestAnimationFrame(frame);
+      }, WALK_START_MS);
     }
     // Now that it's actually positioned, reveal it (see the group's opacity
-    // comment in the JSX above).
+    // comment in the JSX above) — the *outer* drop-in wrapper still hides it
+    // visually until its own delayed spring starts.
     petPos.style.opacity = "1";
 
     return () => {
       if (raf) cancelAnimationFrame(raf);
       if (restTimer) clearTimeout(restTimer);
+      if (walkStartTimer) clearTimeout(walkStartTimer);
       svg.removeEventListener("pointermove", onPointerMove);
       svg.removeEventListener("pointerleave", onPointerLeave);
       if (interactive) {
@@ -423,7 +599,7 @@ export default function PetBuddyPathHero({ interactive = false }: { interactive?
         window.removeEventListener("keyup", onKeyUp);
       }
     };
-  }, [interactive]);
+  }, [interactive, prefersReducedMotion]);
 
   const dpadButtonClass =
     "flex size-10 items-center justify-center rounded-lg bg-card text-muted-foreground shadow-[var(--shadow-2)] transition-colors select-none touch-none hover:bg-muted hover:text-foreground active:bg-muted active:text-foreground";
@@ -441,19 +617,25 @@ export default function PetBuddyPathHero({ interactive = false }: { interactive?
             visible) so they run off the screen edges in their own isometric
             direction — the walkway/pet stay clipped to the frame below. */}
         <g aria-hidden>
-          <line x1="-1276.4" y1="-801.7" x2="354.625" y2="136.283" stroke={STROKE} strokeWidth="0.5" strokeDasharray="12 12" />
-          <line x1="786.624" y1="152.283" x2="3679.6" y2="1802.3" stroke={STROKE} strokeWidth="0.5" strokeDasharray="12 12" />
-          <line x1="906.375" y1="83.6679" x2="2479.6" y2="-824.6" stroke={STROKE} strokeWidth="0.5" strokeDasharray="12 12" />
-          <line x1="-2395.3" y1="1842.4" x2="178.217" y2="247.561" stroke={STROKE} strokeWidth="0.5" strokeDasharray="12 12" />
+          <GuideLine x1={-1276.4} y1={-801.7} x2={354.625} y2={136.283} reduceMotion={!!prefersReducedMotion} mounted={mounted} />
+          <GuideLine x1={786.624} y1={152.283} x2={3679.6} y2={1802.3} reduceMotion={!!prefersReducedMotion} mounted={mounted} />
+          <GuideLine x1={906.375} y1={83.6679} x2={2479.6} y2={-824.6} reduceMotion={!!prefersReducedMotion} mounted={mounted} />
+          <GuideLine x1={-2395.3} y1={1842.4} x2={178.217} y2={247.561} reduceMotion={!!prefersReducedMotion} mounted={mounted} />
         </g>
         <g clipPath="url(#pbh-frame-clip)">
-          <line x1="507.624" y1="272.283" x2="820.624" y2="450.283" stroke={STROKE} strokeWidth="0.5" strokeDasharray="12 12" />
-          <line x1="649.363" y1="190.228" x2="744.363" y2="128.291" stroke={STROKE} strokeWidth="0.5" strokeDasharray="12 12" />
-          <line x1="551.625" y1="-27.7165" x2="649.839" y2="28.9872" stroke={STROKE} strokeWidth="0.5" strokeDasharray="12 12" />
+          <GuideLine x1={507.624} y1={272.283} x2={820.624} y2={450.283} reduceMotion={!!prefersReducedMotion} mounted={mounted} />
+          <GuideLine x1={649.363} y1={190.228} x2={744.363} y2={128.291} reduceMotion={!!prefersReducedMotion} mounted={mounted} />
+          <GuideLine x1={551.625} y1={-27.7165} x2={649.839} y2={28.9872} reduceMotion={!!prefersReducedMotion} mounted={mounted} />
 
-          <g>
-            <g ref={wallsRef} />
-            <path id="pbh-top-path" d={TOP_PATH_D} fill={BG} stroke={STROKE} strokeWidth="1" />
+          <g ref={wallsRef}>
+            {PIECE_CLIPS.map((_, index) => (
+              <PathPiece
+                key={index}
+                index={index}
+                reduceMotion={!!prefersReducedMotion}
+                mounted={mounted}
+              />
+            ))}
           </g>
 
           <g ref={glowLayerRef} mask="url(#pbh-spot-mask)" style={{ opacity: 0, pointerEvents: "none", transition: "opacity 0.35s ease" }} />
@@ -464,89 +646,122 @@ export default function PetBuddyPathHero({ interactive = false }: { interactive?
               transform yet and would otherwise flash at the origin for a
               frame. Opacity is static/SSR-safe, so the browser's very first
               paint already renders it invisible; the effect reveals it only
-              once positioned, before that first paint of the hydrated tree. */}
-          <g ref={petPosRef} style={{ pointerEvents: "none", opacity: 0 }}>
-            <g ref={petMirrorRef}>
-              <ellipse ref={petShadowRef} cx="0" cy="0" rx="30" ry="8" fill="#000" opacity="0.45" />
-              <g ref={petBobRef}>
-                <g ref={petScaleRef}>
-                  <g fill={PET_SH2}>
-                    <use href="#pbh-pet-shape" transform="translate(-24,14)" opacity="0.55" />
-                    <use href="#pbh-pet-shape" transform="translate(-12,7)" opacity="0.8" />
-                  </g>
-
-                  <g filter="url(#pbh-outline)">
-                    <g fill={PET_BODY}>
-                      <rect x="56.25" y="0" width="150" height="112.5" />
-                      <g>
-                        <rect x="56.25" y="0" width="150" height="9.375" fill={PET_HI} />
-                        <rect x="56.25" y="9.375" width="9.375" height="93.75" fill={PET_HI} />
-                        <rect x="196.875" y="0" width="9.375" height="103.125" fill={PET_SH} />
-                        <rect x="56.25" y="103.125" width="150" height="9.375" fill={PET_SH} />
-                        <rect x="93.75" y="84.375" width="7.5" height="7.5" fill={PET_SH} opacity="0.45" />
-                        <rect x="140.625" y="90" width="7.5" height="7.5" fill={PET_SH} opacity="0.45" />
-                        <rect x="121.875" y="72" width="7.5" height="7.5" fill={PET_SH} opacity="0.35" />
-                      </g>
-
-                      <g>
-                        <rect x="28.125" y="37.5" width="28.125" height="37.5" />
-                        <rect x="0" y="37.5" width="28.125" height="37.5" />
-                        <rect x="28.125" y="37.5" width="28.125" height="6" fill={PET_HI} />
-                      </g>
-                      <g>
-                        <rect x="206.25" y="37.5" width="28.125" height="37.5" />
-                        <rect x="234.375" y="37.5" width="28.125" height="37.5" />
-                        <rect x="206.25" y="37.5" width="28.125" height="6" fill={PET_HI} />
-                      </g>
-
-                      <g fill={PET_SH}>
-                        <g>
-                          <rect x="56.25" y="112.5" width="18.75" height="18.75" />
-                          <rect ref={shin1Ref} x="56.25" y="125.25" width="18.75" height="24.75" fill={PET_SH2} />
-                          <rect x="59.625" y="120.75" width="12" height="9" />
-                        </g>
-                        <g>
-                          <rect x="93.75" y="112.5" width="18.75" height="18.75" />
-                          <rect ref={shin2Ref} x="93.75" y="125.25" width="18.75" height="24.75" fill={PET_SH2} />
-                          <rect x="97.125" y="120.75" width="12" height="9" />
-                        </g>
-                        <g>
-                          <rect x="150" y="112.5" width="18.75" height="18.75" />
-                          <rect ref={shin3Ref} x="150" y="125.25" width="18.75" height="24.75" fill={PET_SH2} />
-                          <rect x="153.375" y="120.75" width="12" height="9" />
-                        </g>
-                        <g>
-                          <rect x="187.5" y="112.5" width="18.75" height="18.75" />
-                          <rect ref={shin4Ref} x="187.5" y="125.25" width="18.75" height="24.75" fill={PET_SH2} />
-                          <rect x="190.875" y="120.75" width="12" height="9" />
-                        </g>
-                      </g>
+              once positioned, before that first paint of the hydrated tree.
+              The outer motion.g is the actual entrance: it holds the whole
+              thing at opacity 0 until the walkway has landed, then drops
+              the buddy in from above — independent of petPosRef's own
+              transform, which the walk loop keeps driving underneath it. */}
+          <motion.g
+            initial={{ y: -BUDDY_DROP_PX, opacity: 0 }}
+            animate={
+              prefersReducedMotion || mounted ? { y: 0, opacity: 1 } : { y: -BUDDY_DROP_PX, opacity: 0 }
+            }
+            transition={
+              prefersReducedMotion
+                ? { duration: 0 }
+                : { type: "spring", bounce: BUDDY_DROP_BOUNCE, duration: BUDDY_DROP_DURATION, delay: BUDDY_DROP_DELAY }
+            }
+          >
+            <g ref={petPosRef} style={{ pointerEvents: "none", opacity: 0 }}>
+              <g ref={petMirrorRef}>
+                <ellipse ref={petShadowRef} cx="0" cy="0" rx="30" ry="8" fill="#000" opacity="0.45" />
+                <g ref={petBobRef}>
+                  <g ref={petScaleRef}>
+                    <g fill={PET_SH2}>
+                      <use href="#pbh-pet-shape" transform="translate(-24,14)" opacity="0.55" />
+                      <use href="#pbh-pet-shape" transform="translate(-12,7)" opacity="0.8" />
                     </g>
 
-                    <g ref={backViewRef} style={{ opacity: 0 }}>
-                      <rect x="65.625" y="9.375" width="131.25" height="93.75" fill={PET_SH} opacity="0.6" />
-                      <rect x="112.5" y="28" width="37.5" height="30" fill={PET_SH2} opacity="0.5" />
-                    </g>
+                    <g filter="url(#pbh-outline)">
+                      <g fill={PET_BODY}>
+                        <rect x="56.25" y="0" width="150" height="112.5" />
+                        <g>
+                          <rect x="56.25" y="0" width="150" height="9.375" fill={PET_HI} />
+                          <rect x="56.25" y="9.375" width="9.375" height="93.75" fill={PET_HI} />
+                          <rect x="196.875" y="0" width="9.375" height="103.125" fill={PET_SH} />
+                          <rect x="56.25" y="103.125" width="150" height="9.375" fill={PET_SH} />
+                          <rect x="93.75" y="84.375" width="7.5" height="7.5" fill={PET_SH} opacity="0.45" />
+                          <rect x="140.625" y="90" width="7.5" height="7.5" fill={PET_SH} opacity="0.45" />
+                          <rect x="121.875" y="72" width="7.5" height="7.5" fill={PET_SH} opacity="0.35" />
+                        </g>
 
-                    <g ref={eyesRef}>
-                      <g fill={PET_EYE}>
-                        <rect x="75" y="18.75" width="18.75" height="18.75" />
-                        <rect x="168.75" y="18.75" width="18.75" height="18.75" />
-                        <rect x="78" y="21.75" width="5.5" height="5.5" fill={PET_OUTLINE} />
-                        <rect x="171.75" y="21.75" width="5.5" height="5.5" fill={PET_OUTLINE} />
+                        <g>
+                          <rect x="28.125" y="37.5" width="28.125" height="37.5" />
+                          <rect x="0" y="37.5" width="28.125" height="37.5" />
+                          <rect x="28.125" y="37.5" width="28.125" height="6" fill={PET_HI} />
+                        </g>
+                        <g>
+                          <rect x="206.25" y="37.5" width="28.125" height="37.5" />
+                          <rect x="234.375" y="37.5" width="28.125" height="37.5" />
+                          <rect x="206.25" y="37.5" width="28.125" height="6" fill={PET_HI} />
+                        </g>
+
+                        <g fill={PET_SH}>
+                          <g>
+                            <rect x="56.25" y="112.5" width="18.75" height="18.75" />
+                            <rect ref={shin1Ref} x="56.25" y="125.25" width="18.75" height="24.75" fill={PET_SH2} />
+                            <rect x="59.625" y="120.75" width="12" height="9" />
+                          </g>
+                          <g>
+                            <rect x="93.75" y="112.5" width="18.75" height="18.75" />
+                            <rect ref={shin2Ref} x="93.75" y="125.25" width="18.75" height="24.75" fill={PET_SH2} />
+                            <rect x="97.125" y="120.75" width="12" height="9" />
+                          </g>
+                          <g>
+                            <rect x="150" y="112.5" width="18.75" height="18.75" />
+                            <rect ref={shin3Ref} x="150" y="125.25" width="18.75" height="24.75" fill={PET_SH2} />
+                            <rect x="153.375" y="120.75" width="12" height="9" />
+                          </g>
+                          <g>
+                            <rect x="187.5" y="112.5" width="18.75" height="18.75" />
+                            <rect ref={shin4Ref} x="187.5" y="125.25" width="18.75" height="24.75" fill={PET_SH2} />
+                            <rect x="190.875" y="120.75" width="12" height="9" />
+                          </g>
+                        </g>
+                      </g>
+
+                      <g ref={backViewRef} style={{ opacity: 0 }}>
+                        <rect x="65.625" y="9.375" width="131.25" height="93.75" fill={PET_SH} opacity="0.6" />
+                        <rect x="112.5" y="28" width="37.5" height="30" fill={PET_SH2} opacity="0.5" />
+                      </g>
+
+                      <g ref={eyesRef}>
+                        <g fill={PET_EYE}>
+                          <rect x="75" y="18.75" width="18.75" height="18.75" />
+                          <rect x="168.75" y="18.75" width="18.75" height="18.75" />
+                          <rect x="78" y="21.75" width="5.5" height="5.5" fill={PET_OUTLINE} />
+                          <rect x="171.75" y="21.75" width="5.5" height="5.5" fill={PET_OUTLINE} />
+                        </g>
                       </g>
                     </g>
                   </g>
                 </g>
               </g>
             </g>
-          </g>
+          </motion.g>
         </g>
 
         <defs>
           <clipPath id="pbh-frame-clip">
             <rect x="0.5" y="0.5" width="1040" height="434" />
           </clipPath>
+
+          {/* The single shared copy of the walkway artwork. Each falling
+              piece <use>s this and clips it to its own leg; the cursor
+              spotlight's glow layer clones these same paths (see the effect
+              above), so there's exactly one source of truth for the shape. */}
+          <g id="pbh-walkway">
+            {WALL_QUADS.map((d, i) => (
+              <path key={i} className="pbh-wall-quad" d={d} fill="url(#pbh-hatch)" stroke={STROKE} strokeWidth="0.75" />
+            ))}
+            <path id="pbh-top-path" d={TOP_PATH_D} fill={BG} stroke={STROKE} strokeWidth="1" />
+          </g>
+
+          {PIECE_CLIPS.map((points, index) => (
+            <clipPath id={`pbh-piece-${index}`} key={index}>
+              <polygon points={points} />
+            </clipPath>
+          ))}
 
           <pattern id="pbh-hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
             <rect width="6" height="6" fill={BG} />
