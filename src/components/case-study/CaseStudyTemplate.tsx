@@ -103,11 +103,12 @@ function SolutionRow({
             badges, strips) — object-cover into a fixed 16:9 box was
             cropping and upscaling them into an unreadable zoomed-in mess.
             object-contain shows the whole crop at its own aspect ratio,
-            letterboxed on the card's own dark background instead. */}
+            letterboxed on the transparent page background instead — only
+            the main screenshot (ProjectCard, above) gets the dark tray. */}
         {solution.images.map((img) => (
           <div
             key={img.src}
-            className="relative aspect-video w-full overflow-hidden rounded-lg bg-[#1f1f1f]"
+            className="relative aspect-video w-full overflow-hidden rounded-lg"
           >
             <Image
               src={img.src}
