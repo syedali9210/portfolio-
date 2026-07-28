@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Lenis from "lenis";
 import { cubicBezier } from "@/lib/bezier";
+import { registerLenis } from "@/lib/smooth-scroll";
 
 // Same curve used across the site's own motion (Framer Motion transitions,
 // e.g. Projects/YappingAccordion), so the scroll feel matches everything else.
@@ -21,6 +22,10 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
       duration: 1.1,
       easing: SCROLL_EASE,
     });
+    // Published so same-page jumps (Scrubber, MobileNav, Nav's section links,
+    // PageTransition's hash restore) can go through Lenis instead of fighting
+    // it with native smooth scrolling — see lib/smooth-scroll.
+    registerLenis(lenis);
 
     let rafId: number;
     function raf(time: number) {
@@ -31,6 +36,7 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
 
     return () => {
       cancelAnimationFrame(rafId);
+      registerLenis(null);
       lenis.destroy();
     };
   }, []);

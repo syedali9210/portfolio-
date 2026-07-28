@@ -6,6 +6,7 @@ import { Elevated } from "@/lib/elevated";
 import { useActiveSection } from "@/hooks/use-active-section";
 import { NAV_ITEMS } from "@/components/Nav";
 import PageSwitchTab from "@/components/PageSwitchTab";
+import { scrollToSection } from "@/lib/smooth-scroll";
 
 const ICONS = {
   projects: Layers,
@@ -22,9 +23,7 @@ export default function MobileNav() {
       <Elevated offset={3} className="inline-flex rounded-3xl">
         <Tabs
           value={activeId}
-          onValueChange={(id) => {
-            document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-          }}
+          onValueChange={(id) => scrollToSection(id)}
         >
           <TabsList aria-label="Section navigation" className="gap-2">
             {NAV_ITEMS.map((item) => (

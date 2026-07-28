@@ -3,6 +3,7 @@
 import { useLayoutEffect } from "react";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
+import { scrollToSection, scrollToTop } from "@/lib/smooth-scroll";
 
 // House ease [0.22,1,0.36,1] (same curve as FadeIn/SmoothScroll) applied to
 // a horizontal slide instead of a fade — the incoming page slides in from
@@ -24,8 +25,22 @@ export default function PageTransition({ children }: { children: React.ReactNode
   // mount work, which read as the whole screen going black. popLayout below
   // keeps the outgoing page mounted (absolutely positioned) while the new
   // one mounts immediately, so there's never an empty-DOM moment.
+  //
+  // Landing on a hash is the exception, and resetting unconditionally used to
+  // break it: coming back from a case study via "/#projects" would mount Home
+  // and then immediately scroll past the anchor to the top, so the link looked
+  // like it just dumped you at the top of the page. Honour the hash when the
+  // incoming page actually has that section, and only fall back to the top.
   useLayoutEffect(() => {
-    window.scrollTo(0, 0);
+    const hash = decodeURIComponent(window.location.hash.slice(1));
+    if (hash && document.getElementById(hash)) {
+      // Next has already jumped to the anchor by this point; re-running it
+      // here only adds the fixed header's offset so the section heading isn't
+      // tucked underneath the nav.
+      scrollToSection(hash, { immediate: true });
+      return;
+    }
+    scrollToTop();
   }, [pathname]);
 
   return (

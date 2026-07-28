@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
+import { scrollToSection } from "@/lib/smooth-scroll";
 
 const ACCENT = "#db744f";
 const SPRING = { type: "spring" as const, bounce: 0.25, duration: 0.35 };
@@ -88,7 +89,7 @@ export default function Scrubber({ items }: { items: ScrubberItem[] }) {
   const highlightKey = hovered ?? activeKey;
 
   function handleSelect(id: string) {
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    scrollToSection(id);
   }
 
   return (

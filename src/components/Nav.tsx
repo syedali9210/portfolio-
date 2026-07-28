@@ -7,6 +7,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useActiveSection } from "@/hooks/use-active-section";
+import { scrollToSection } from "@/lib/smooth-scroll";
 
 // Absolute ("/#hash") rather than bare ("#hash") so these still work when
 // clicked from a sub-page like /projects/[slug] instead of silently
@@ -41,8 +42,13 @@ export default function Nav() {
     return () => clearInterval(id);
   }, []);
 
+  // The standard portal handshake: the target node can't be read during
+  // render (it doesn't exist server-side), so it's resolved once after mount
+  // and the first client render falls back to rendering inline. That single
+  // extra render is inherent to portalling, not an accidental cascade.
   const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
   useLayoutEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- portal target must be read post-mount; see above
     setPortalTarget(document.getElementById("nav-root"));
   }, []);
 
@@ -67,9 +73,22 @@ export default function Nav() {
           <nav className="hidden items-center gap-2 rounded-full bg-muted px-1.5 py-1 sm:flex">
             <div className="flex items-center gap-6 sm:gap-10">
               {NAV_ITEMS.map((item) => (
-                <a
+                // Link, not a bare <a>: these point at "/#section", so from a
+                // sub-page like /projects/[slug] a plain anchor made the
+                // browser do a full document load just to get back Home.
+                // Cross-route clicks now navigate client-side and land on the
+                // section via PageTransition's hash restore; same-page clicks
+                // are handled below, since the pathname doesn't change and
+                // that effect would never fire.
+                <Link
                   key={item.href}
                   href={item.href}
+                  onClick={(e) => {
+                    if (pathname !== "/") return;
+                    e.preventDefault();
+                    scrollToSection(item.id);
+                    window.history.replaceState(null, "", item.href);
+                  }}
                   className={cn(
                     "flex items-center rounded-full px-2 py-1 text-base font-medium tracking-tight transition-colors",
                     activeId === item.id
@@ -78,7 +97,7 @@ export default function Nav() {
                   )}
                 >
                   {item.label}
-                </a>
+                </Link>
               ))}
             </div>
           </nav>
