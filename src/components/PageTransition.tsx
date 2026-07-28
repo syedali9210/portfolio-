@@ -4,10 +4,10 @@ import { useLayoutEffect } from "react";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 
-// Same fade+rise recipe FadeIn uses for content appearing on scroll
-// (opacity+y, house ease [0.22,1,0.36,1]) — reused here as a route-change
-// crossfade so navigating between pages reads with the same motion language
-// as everything else on the site, instead of Next's default instant cut.
+// House ease [0.22,1,0.36,1] (same curve as FadeIn/SmoothScroll) applied to
+// a horizontal slide instead of a fade — the incoming page slides in from
+// the right while the outgoing one slides out to the left, so route changes
+// read as lateral navigation rather than Next's default instant cut.
 // Keyed on pathname only (not the full URL), so in-page hash navigation
 // (/#projects, /#about-me) never retriggers it — only real route changes do.
 export default function PageTransition({ children }: { children: React.ReactNode }) {
@@ -32,11 +32,13 @@ export default function PageTransition({ children }: { children: React.ReactNode
     <AnimatePresence mode="popLayout" initial={false}>
       <motion.div
         key={pathname}
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -8 }}
+        initial={{ opacity: 0, x: 32 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -32 }}
         transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-        className="flex flex-1 flex-col"
+        // pt-16 makes room for Nav's fixed header, which no longer reserves
+        // space in flow now that it's portaled out to #nav-root.
+        className="flex flex-1 flex-col pt-16"
       >
         {children}
       </motion.div>

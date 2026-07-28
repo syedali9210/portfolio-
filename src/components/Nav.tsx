@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import { useIsPresent } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -39,15 +41,30 @@ export default function Nav() {
     return () => clearInterval(id);
   }, []);
 
-  return (
-    <header className="sticky top-0 z-50 w-full">
+  const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
+  useLayoutEffect(() => {
+    setPortalTarget(document.getElementById("nav-root"));
+  }, []);
+
+  // Portaling escapes PageTransition's animated wrapper (see above), which
+  // also means this stops inheriting that wrapper's exit opacity/position —
+  // without this, a page mid-exit would render its own full-opacity header
+  // stacked on top of the incoming page's. useIsPresent reflects the
+  // ancestor AnimatePresence's state via React context (unaffected by where
+  // the DOM node ends up), so the outgoing page's nav can just disappear
+  // immediately instead of needing to fade or wait for unmount.
+  const isPresent = useIsPresent();
+  if (!isPresent) return null;
+
+  const header = (
+    <header className="fixed inset-x-0 top-0 z-50 w-full">
       <div className="mx-auto flex w-full max-w-[680px] items-center justify-between px-4 py-3 sm:px-6">
         <Link href="/#home" className="text-base text-muted-foreground">
           Syed.Ali
         </Link>
 
         {showSectionNav && (
-          <nav className="hidden items-center gap-2 rounded-full bg-muted p-1.5 sm:flex">
+          <nav className="hidden items-center gap-2 rounded-full bg-muted px-1.5 py-1 sm:flex">
             <div className="flex items-center gap-6 sm:gap-10">
               {NAV_ITEMS.map((item) => (
                 <a
@@ -73,4 +90,6 @@ export default function Nav() {
       </div>
     </header>
   );
+
+  return portalTarget ? createPortal(header, portalTarget) : header;
 }

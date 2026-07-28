@@ -61,7 +61,11 @@ export default function RootLayout({
       className={`${segoeUI.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col bg-background text-foreground">
+      <body className="min-h-full flex flex-col overflow-x-hidden bg-background text-foreground">
+        {/* Nav portals its fixed header in here — a sibling of PageTransition,
+            so it never sits inside that wrapper's animated transform (see
+            Nav.tsx for why that matters). */}
+        <div id="nav-root" />
         <ThemeProvider attribute="class" defaultTheme="dark" disableTransitionOnChange>
           <ViewportEdgeBlur />
           <SmoothScroll>
