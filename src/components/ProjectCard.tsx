@@ -5,12 +5,15 @@ import type { Project } from "@/data/projects";
 function CardBody({ project }: { project: Project }) {
   return (
     <>
-      <div className="relative h-[200px] w-full overflow-hidden rounded-xl bg-[#1f1f1f] sm:h-[300px] lg:h-[360px]">
-        <div className="absolute left-1/2 top-1/2 h-[87%] w-[94%] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-md border-[5px] border-[#f3f3f3]/90">
-          {project.image ? (
-            <Image src={project.image} alt={`${project.title} screenshot`} fill className="object-cover object-top" />
-          ) : null}
-        </div>
+      {/* One box, not an outer tray with the image centered/inset inside it
+          — the inset used to only make sense against the old dark tray
+          background; now that the tray's transparent, the extra margin just
+          left the image floating short of the grid instead of flush with
+          it. The border lives directly on the sized box, image fills it. */}
+      <div className="relative h-[200px] w-full overflow-hidden rounded-xl border-[5px] border-[#f3f3f3]/90 sm:h-[300px] lg:h-[360px]">
+        {project.image ? (
+          <Image src={project.image} alt={`${project.title} screenshot`} fill className="object-cover object-top" />
+        ) : null}
       </div>
 
       <div className="flex w-full flex-col gap-4 sm:flex-row sm:items-start sm:gap-[22px]">

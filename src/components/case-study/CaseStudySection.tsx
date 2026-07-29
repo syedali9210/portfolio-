@@ -7,7 +7,14 @@ export default function CaseStudySection({
   className?: string;
   id?: string;
 }) {
+  // No card/background — sections sit flush on the page. The divider that
+  // separates them lives on the FadeIn wrapper in CaseStudyTemplate instead
+  // of here: each section has its own FadeIn, so `last:` on this element
+  // would only ever see an only-child and never actually match the true
+  // last section.
   return (
-    <div id={id} className={`rounded-xl bg-muted p-6 sm:p-8 md:px-10 md:py-8 ${className}`}>{children}</div>
+    <div id={id} className={className}>
+      {children}
+    </div>
   );
 }

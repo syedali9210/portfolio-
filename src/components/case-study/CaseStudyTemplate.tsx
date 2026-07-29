@@ -140,18 +140,27 @@ function OutcomeRow({ label, metric }: { label: string; metric: string }) {
   );
 }
 
+// Same hairline divider Projects.tsx uses for its own stacked rows, applied
+// to the FadeIn wrappers (true flex siblings) rather than the sections
+// themselves — see CaseStudySection for why.
+const SECTION_CLASS = "border-b border-foreground/10 py-8 last:border-b-0 sm:py-10";
+
 export default function CaseStudyTemplate({ project }: { project: Project }) {
   const cs = project.caseStudy;
   if (!cs) return null;
 
   return (
     <main className="mx-auto w-full max-w-[680px] py-12 sm:py-20">
-      <FadeIn className="px-4 sm:px-6">
+      {/* No px-4 sm:px-6 here — ProjectCard's own root div already carries
+          that padding (it needs it standing alone as a list row on the home
+          page), so adding it again on this wrapper double-applied it and
+          pushed the hero card 24px further in than every section below. */}
+      <FadeIn>
         <ProjectCard project={project} linkable={false} />
       </FadeIn>
 
-      <div className="mt-8 flex flex-col gap-8 px-4 sm:px-6">
-        <FadeIn>
+      <div className="mt-8 flex flex-col px-4 sm:px-6">
+        <FadeIn className={SECTION_CLASS}>
           <CaseStudySection id="overview" className="flex flex-col gap-4">
             <SectionTitle>Overview</SectionTitle>
             <div className="flex flex-col gap-3">
@@ -162,7 +171,7 @@ export default function CaseStudyTemplate({ project }: { project: Project }) {
           </CaseStudySection>
         </FadeIn>
 
-        <FadeIn delay={0.05}>
+        <FadeIn delay={0.05} className={SECTION_CLASS}>
           <CaseStudySection id="challenge" className="flex flex-col gap-4">
             <SectionTitle>The Challenge</SectionTitle>
             <div className="flex flex-col gap-3">
@@ -173,7 +182,7 @@ export default function CaseStudyTemplate({ project }: { project: Project }) {
           </CaseStudySection>
         </FadeIn>
 
-        <FadeIn delay={0.05}>
+        <FadeIn delay={0.05} className={SECTION_CLASS}>
           <CaseStudySection id="research" className="flex flex-col gap-8">
             <div className="flex flex-col gap-4">
               <SectionTitle>{cs.researchTitle}</SectionTitle>
@@ -192,7 +201,7 @@ export default function CaseStudyTemplate({ project }: { project: Project }) {
         </FadeIn>
 
         {cs.findings && cs.findingsTitle && (
-          <FadeIn delay={0.05}>
+          <FadeIn delay={0.05} className={SECTION_CLASS}>
             <CaseStudySection id="findings" className="flex flex-col gap-8">
               <div className="flex flex-col gap-4">
                 <SectionTitle>{cs.findingsTitle}</SectionTitle>
@@ -211,7 +220,7 @@ export default function CaseStudyTemplate({ project }: { project: Project }) {
           </FadeIn>
         )}
 
-        <FadeIn delay={0.05}>
+        <FadeIn delay={0.05} className={SECTION_CLASS}>
           <CaseStudySection id="insights" className="flex flex-col gap-6">
             <div className="flex flex-col gap-4">
               <SectionTitle>{cs.insightsTitle}</SectionTitle>
@@ -229,7 +238,7 @@ export default function CaseStudyTemplate({ project }: { project: Project }) {
           </CaseStudySection>
         </FadeIn>
 
-        <FadeIn delay={0.05}>
+        <FadeIn delay={0.05} className={SECTION_CLASS}>
           <CaseStudySection id="solutions" className="flex flex-col gap-6">
             <div className="flex flex-col gap-4">
               <SectionTitle>{cs.solutionsTitle}</SectionTitle>
@@ -247,7 +256,7 @@ export default function CaseStudyTemplate({ project }: { project: Project }) {
           </CaseStudySection>
         </FadeIn>
 
-        <FadeIn delay={0.05}>
+        <FadeIn delay={0.05} className={SECTION_CLASS}>
           <CaseStudySection id="outcomes" className="flex flex-col gap-8">
             <div className="flex flex-col gap-4">
               <SectionTitle>{cs.outcomesTitle}</SectionTitle>
@@ -270,7 +279,7 @@ export default function CaseStudyTemplate({ project }: { project: Project }) {
           </CaseStudySection>
         </FadeIn>
 
-        <FadeIn delay={0.05}>
+        <FadeIn delay={0.05} className={SECTION_CLASS}>
           <CaseStudySection id="learned" className="flex flex-col gap-4">
             <SectionTitle>{cs.learnedTitle}</SectionTitle>
             <div className="flex flex-col gap-3">
