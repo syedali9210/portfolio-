@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import FadeIn from "@/components/FadeIn";
 import SectionHeading from "@/components/SectionHeading";
@@ -48,14 +47,45 @@ const STICKER_TABS = [
 const PHOTO_W = 122;
 const PHOTO_H = 162;
 
+// Spotlight size, same ratio. Sized so photo + caption clear the frame's
+// 320px min-height on mobile.
+const SPOT_W = 150;
+const SPOT_H = 200;
+
 export default function AboutMe() {
   const [activeTab, setActiveTab] = useState(STICKER_TABS[0].value);
   const [spotlight, setSpotlight] = useState<string | null>(null);
   const mounted = useRef(false);
 
+  // Where the spotlit photo starts from: the offset between its sticker's
+  // resting slot and the centred spot it lands in. Measured, because the
+  // landing spot is whatever the centred column works out to.
+  const slotRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const landingRef = useRef<HTMLDivElement>(null);
+  // Tagged with the tab it was measured for — `initial` is captured at mount,
+  // so switching tabs must not let the photo start from the old tab's slot.
+  const [flyFrom, setFlyFrom] = useState<{ value: string; x: number; y: number } | null>(null);
+
   useEffect(() => {
     mounted.current = true;
   }, []);
+
+  useLayoutEffect(() => {
+    if (!spotlight) {
+      setFlyFrom(null);
+      return;
+    }
+    const slot = slotRefs.current[spotlight];
+    const landing = landingRef.current;
+    if (!slot || !landing) return;
+    const from = slot.getBoundingClientRect();
+    const to = landing.getBoundingClientRect();
+    setFlyFrom({
+      value: spotlight,
+      x: from.left + from.width / 2 - (to.left + to.width / 2),
+      y: from.top + from.height / 2 - (to.top + to.height / 2),
+    });
+  }, [spotlight]);
 
   // Escape closes the sticker spotlight.
   useEffect(() => {
@@ -115,59 +145,87 @@ export default function AboutMe() {
 
           <div className="mt-6 flex h-full flex-wrap items-center justify-around gap-6">
             {STICKER_TABS.map((tab) => (
-              <div key={tab.value} style={{ rotate: `${tab.rotation}deg` }}>
+              <div
+                key={tab.value}
+                ref={(el) => {
+                  slotRefs.current[tab.value] = el;
+                }}
+                // Hidden while spotlit so the photo reads as having lifted out
+                // of this slot rather than being cloned.
+                style={{
+                  rotate: `${tab.rotation}deg`,
+                  visibility: spotlight === tab.value ? "hidden" : "visible",
+                }}
+              >
                 <StickerDrag image={tab.image} imageWidth={PHOTO_W} imageHeight={PHOTO_H} />
               </div>
             ))}
           </div>
+
+          {/* Spotlight stays inside the frame: blurs the stickers behind it and
+              grows the picked photo up out of its sticker size/rotation.
+              z sits above the drag z-index counter (starts at 1000). */}
+          <AnimatePresence>
+            {spotlightTab && (
+              <motion.div
+                key={spotlightTab.value}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="absolute inset-0 z-[2000] flex flex-col items-center justify-center gap-4 rounded-xl bg-secondary/50 px-6 text-center backdrop-blur-md sm:px-10 dark:bg-card/50"
+                onClick={() => setSpotlight(null)}
+              >
+                {/* Reserves the landing box so it can be measured on the first
+                    layout pass; the photo drops in on the second. */}
+                <div ref={landingRef} style={{ width: SPOT_W, height: SPOT_H }}>
+                  {flyFrom?.value === spotlightTab.value && (
+                    <motion.div
+                      initial={{
+                        x: flyFrom.x,
+                        y: flyFrom.y,
+                        scale: PHOTO_W / SPOT_W,
+                        rotate: spotlightTab.rotation,
+                      }}
+                      animate={{ x: 0, y: 0, scale: 1, rotate: 0 }}
+                      transition={{ type: "spring", stiffness: 220, damping: 24 }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <StickerDrag
+                        image={spotlightTab.image}
+                        imageWidth={SPOT_W}
+                        imageHeight={SPOT_H}
+                        peeled
+                      />
+                    </motion.div>
+                  )}
+                </div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.12 }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <p className="text-xl font-medium text-foreground">{spotlightTab.label}</p>
+                  <p className="mt-2 text-base leading-relaxed text-muted-foreground">
+                    {spotlightTab.content}
+                  </p>
+                </motion.div>
+
+                <button
+                  type="button"
+                  onClick={() => setSpotlight(null)}
+                  aria-label="Close"
+                  className="absolute right-3 top-3 rounded-lg px-2 py-1 text-base text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  ✕
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </FadeIn>
-
-      {/* Site-wide blur with the selected sticker raised above it */}
-      <AnimatePresence>
-        {spotlightTab && (
-          <motion.div
-            key={spotlightTab.value}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            className="fixed inset-0 z-[3000] flex items-center justify-center bg-background/40 backdrop-blur-lg"
-            onClick={() => setSpotlight(null)}
-          >
-            <motion.div
-              initial={{ y: 80, scale: 0.7 }}
-              animate={{ y: 0, scale: 1 }}
-              transition={{ type: "spring", stiffness: 260, damping: 22 }}
-              className="flex max-w-sm flex-col items-center gap-6 px-6 text-center"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div style={{ rotate: `${spotlightTab.rotation}deg` }}>
-                <Image
-                  src={spotlightTab.image}
-                  alt={spotlightTab.label}
-                  width={220}
-                  height={293}
-                  className="drop-shadow-[0px_13px_14px_rgba(0,0,0,0.3)]"
-                />
-              </div>
-              <div>
-                <p className="text-xl font-medium text-foreground">{spotlightTab.label}</p>
-                <p className="mt-2 text-base leading-relaxed text-muted-foreground">
-                  {spotlightTab.content}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSpotlight(null)}
-                className="rounded-xl bg-secondary px-4 py-2 text-base text-foreground transition-colors hover:bg-secondary/70"
-              >
-                Close
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </section>
   );
 }

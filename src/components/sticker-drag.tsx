@@ -214,6 +214,8 @@ export interface StickerDragProps {
   elevation?: number;
   staticShadow?: string;
   dynamicShadow?: string;
+  /** Peels the sticker up without a drag, for parent-driven reveals. */
+  peeled?: boolean;
   style?: React.CSSProperties;
 }
 
@@ -230,6 +232,7 @@ export default function StickerDrag({
   elevation: elevationLevel = 10,
   staticShadow = STATIC_SHADOW_DEFAULT,
   dynamicShadow = DYNAMIC_SHADOW_DEFAULT,
+  peeled = false,
   style,
 }: StickerDragProps) {
   const tiltSensitivity = DRAG_TILT_SENSITIVITY;
@@ -369,6 +372,10 @@ export default function StickerDrag({
           state.peel = Math.min(1, state.peel + step);
           state.lift = Math.min(1, state.lift + step);
           changed = true;
+        } else {
+          // Fully peeled — drop the flag so a parent-driven peel (no pointer
+          // held) doesn't keep the rAF loop spinning on nothing.
+          state.peeling = false;
         }
       }
 
@@ -499,6 +506,10 @@ export default function StickerDrag({
     return () => {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
+        // Must clear the handle: ensureTickRunning treats a non-null one as
+        // "already looping" and would never schedule again after a remount.
+        animationRef.current = null;
+        lastTickTRef.current = null;
       }
       gl.deleteShader(vs);
       gl.deleteShader(fs);
@@ -600,6 +611,22 @@ export default function StickerDrag({
   useEffect(() => {
     handleResize();
   }, [handleResize]);
+
+  // Parent-driven peel: same warp the drag gesture produces, no pointer needed.
+  useEffect(() => {
+    const state = stateRef.current;
+    if (peeled) {
+      state.peeling = true;
+      state.sticking = false;
+    } else if (state.peel > 0 || state.lift > 0) {
+      state.peeling = false;
+      state.sticking = true;
+    } else {
+      // Never peeled — nothing to animate, don't wake the loop.
+      return;
+    }
+    ensureTickRunning();
+  }, [peeled, ensureTickRunning]);
 
   const beginDrag = useCallback(
     (clientX: number, clientY: number) => {
