@@ -29,32 +29,6 @@
   -webkit-font-smoothing: antialiased;
 }
 
-.chat-quiz[data-theme="light"] {
-  color-scheme: light;
-  --card: #ffffff;
-  --edge: rgba(0, 0, 0, 0.08);
-  --hair: rgba(0, 0, 0, 0.05);
-  --chip: rgba(0, 0, 0, 0.045);
-  --hover: rgba(0, 0, 0, 0.04);
-  --title: #0b0b0d;
-  --text: #26262a;
-  --muted: #71717a;
-  --faint: #a1a1aa;
-  --ring: #c4c4cc;
-  --btn: rgba(255, 255, 255, 0.85);
-  --btn-edge: rgba(0, 0, 0, 0.12);
-  --send: #e9e9ee;
-  --send-on: #18181b;
-  --send-ink: #71717a;
-  --send-ink-on: #ffffff;
-  --shadow: 0 20px 50px -22px rgba(0, 0, 0, 0.25);
-  --shadow-up: 0 -8px 22px -14px rgba(0, 0, 0, 0.22), 0 20px 50px -22px rgba(0, 0, 0, 0.25);
-  --scroll: #d4d4d8;
-  --shim-hi: #0b0b0d;
-  --sel: rgba(0, 0, 0, 0.05);
-  --sel-ink: #3f3f46;
-}
-
 /* Shimmer sweep for the in-progress line. The gradient is clipped to the glyphs,
    so the highlight travels through the letterforms rather than behind them.
    --shim-base is set per element (the step's own tint). */

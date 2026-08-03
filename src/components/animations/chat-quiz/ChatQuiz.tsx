@@ -364,9 +364,9 @@ export default function ChatQuiz() {
   const quizRef = useRef<HTMLDivElement>(null);
   const pillRef = useRef<HTMLDivElement>(null);
   const [viewH, setViewH] = useState(0);
-  // scoped to this widget only — see chat-quiz.css; not the site's real theme
-  const [light, setLight] = useState(false);
   const timers = useRef<number[]>([]);
+  // Guards the scheduled advance() in pick() — see there for why.
+  const advancing = useRef(false);
 
   const after = (ms: number, fn: () => void) =>
     timers.current.push(window.setTimeout(fn, ms));
@@ -461,7 +461,19 @@ export default function ChatQuiz() {
 
   function pick(i: number) {
     setPicked(i);
-    if (!last) after(420, advance);
+    // A second pick landing inside the 420ms window (a fast double-tap, easy
+    // to hit on a touchscreen) must not schedule a second advance() — two
+    // firing back to back both take the "not last" branch and bump `index`
+    // twice, pushing it past QUESTIONS' last index and crashing on
+    // `question.q`. The ref (unlike `last`, which advance() would otherwise
+    // close over stale) is always current at fire time.
+    if (!last && !advancing.current) {
+      advancing.current = true;
+      after(420, () => {
+        advancing.current = false;
+        advance();
+      });
+    }
   }
 
   /* --- palettes ------------------------------------------------------------
@@ -594,11 +606,8 @@ export default function ChatQuiz() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <div
-        className="chat-quiz relative flex w-full max-w-[760px] flex-col gap-3"
-        data-theme={light ? "light" : "dark"}
-      >
-      {/* ---- replay + theme ---- */}
+      <div className="chat-quiz relative flex w-full max-w-[760px] flex-col gap-3">
+      {/* ---- replay ---- */}
       <div className="flex justify-end gap-2">
         <motion.button
           onClick={replay}
@@ -609,40 +618,6 @@ export default function ChatQuiz() {
           className="grid h-9 w-9 place-items-center rounded-full border border-[var(--edge)] bg-[var(--card)] text-[var(--muted)] shadow-[var(--shadow)] outline-none focus-visible:ring-2 focus-visible:ring-blue-500/45"
         >
           <Icon name="rotate-ccw" className="h-[15px] w-[15px]" />
-        </motion.button>
-        <motion.button
-          onClick={() => setLight((l) => !l)}
-          aria-label={light ? "Switch to dark" : "Switch to light"}
-          whileHover={{ scale: 1.06 }}
-          whileTap={{ scale: 0.92 }}
-          transition={SPRING_SNAP}
-          className="grid h-9 w-9 place-items-center overflow-hidden rounded-full border border-[var(--edge)] bg-[var(--card)] text-[var(--muted)] shadow-[var(--shadow)]"
-        >
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.svg
-              key={light ? "sun" : "moon"}
-              viewBox="0 0 24 24"
-              className="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.8}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              initial={{ opacity: 0, rotate: -70, scale: 0.6 }}
-              animate={{ opacity: 1, rotate: 0, scale: 1 }}
-              exit={{ opacity: 0, rotate: 70, scale: 0.6 }}
-              transition={{ duration: 0.32, ease: EASE_OUT }}
-            >
-              {light ? (
-                <>
-                  <circle cx="12" cy="12" r="4" />
-                  <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
-                </>
-              ) : (
-                <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
-              )}
-            </motion.svg>
-          </AnimatePresence>
         </motion.button>
       </div>
 
@@ -1138,7 +1113,7 @@ export default function ChatQuiz() {
           className="pointer-events-none absolute inset-0 overflow-hidden"
           style={{ borderRadius: R }}
         >
-          <DitherField interactive preset={fieldPreset} light={light} />
+          <DitherField interactive preset={fieldPreset} />
         </div>
         {/* column fills the card so the toolbar is pinned to the bottom edge
             rather than floating wherever the text happens to end */}

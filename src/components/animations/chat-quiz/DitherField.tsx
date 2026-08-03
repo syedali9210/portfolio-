@@ -54,22 +54,16 @@ export const PRESETS = {
 } as const
 export type Preset = keyof typeof PRESETS
 
-/**
- * Build the six colour buckets for a deep→bright pair.
- * Light mode runs the ramp the other way: on white the near-white `bright` end
- * would vanish, so intensity has to darken rather than brighten.
- */
+/** Build the six colour buckets for a deep→bright pair. */
 const ramp = (
-  light: boolean,
   deep: readonly number[],
   bright: readonly number[],
   out: string[],
 ) => {
-  const [lo, hi] = light ? [bright, deep] : [deep, bright]
   for (let l = 0; l < LEVELS; l++) {
     const k = (l + 0.5) / LEVELS
-    const c = (i: number) => Math.round(lo[i] + (hi[i] - lo[i]) * k)
-    const a = light ? 0.36 + 0.6 * k : 0.38 + 0.62 * k
+    const c = (i: number) => Math.round(deep[i] + (bright[i] - deep[i]) * k)
+    const a = 0.38 + 0.62 * k
     out[l] = `rgba(${c(0)},${c(1)},${c(2)},${a.toFixed(3)})`
   }
   return out
@@ -99,9 +93,6 @@ type Phase = 'idle' | 'gather' | 'loading' | 'fall'
  * and keep going — a spinner made of the gradient itself. Bumping `variant`
  * mid-flight reshuffles them into a different swirl and palette.
  * `spread` scales how far the gradient reaches in from the corner.
- * `light` picks the ramp direction — passed down from the host's own theme
- * state rather than read off `document.documentElement`, so this stays a
- * self-contained widget instead of reacting to the page's real theme.
  */
 export default function DitherField({
   interactive = false,
@@ -109,29 +100,25 @@ export default function DitherField({
   preset = 'calm',
   variant = 0,
   spread = 0.55,
-  light = false,
 }: {
   interactive?: boolean
   loading?: boolean
   preset?: Preset
   variant?: number
   spread?: number
-  light?: boolean
 }) {
   const ref = useRef<HTMLCanvasElement>(null)
   // read inside the rAF loop — a dep change would restart the whole field
   const loadingRef = useRef(loading)
   const variantRef = useRef(variant)
   const presetRef = useRef<Preset>(preset)
-  const lightRef = useRef(light)
   // Kept out of the rAF-loop effect's deps below (only `interactive`/`spread`
   // restart it) — the loop reads these refs each frame instead.
   useEffect(() => {
     loadingRef.current = loading
     variantRef.current = variant % SWIRLS.length
     presetRef.current = preset
-    lightRef.current = light
-  }, [loading, variant, preset, light])
+  }, [loading, variant, preset])
 
   useEffect(() => {
     const canvas = ref.current!
@@ -417,9 +404,9 @@ export default function DitherField({
       // the loading swirl keeps its own per-step palette; everything else rides the preset
       if (phase === 'loading') {
         const s = SWIRLS[shownVariant]
-        ramp(lightRef.current, s.deep, s.bright, shades)
+        ramp(s.deep, s.bright, shades)
       } else {
-        ramp(lightRef.current, lerp3(A.deep, B.deep, blend), lerp3(A.bright, B.bright, blend), shades)
+        ramp(lerp3(A.deep, B.deep, blend), lerp3(A.bright, B.bright, blend), shades)
       }
       const dotAlpha = phase === 'idle' ? 1 : Math.max(fieldK, pAlpha)
       for (let l = 0; l < LEVELS; l++) {
@@ -458,8 +445,8 @@ export default function DitherField({
       surface.removeEventListener('pointerdown', onDown)
       window.removeEventListener('pointerup', onUp)
     }
-    // `loading`/`variant`/`preset`/`light` are deliberately excluded — they're
-    // read each frame via their refs so changing them doesn't tear down and
+    // `loading`/`variant`/`preset` are deliberately excluded — they're read
+    // each frame via their refs so changing them doesn't tear down and
     // reinitialize the canvas/rAF loop. Only `interactive`/`spread` should.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [interactive, spread])
