@@ -6,6 +6,7 @@ import NotchCardDemo from "@/components/animations/NotchCardDemo";
 import ScratchCardDemo from "@/components/animations/ScratchCardDemo";
 import ScrubberCallout from "@/components/animations/ScrubberCallout";
 import MazeWalkPlayable from "@/components/animations/MazeWalkPlayable";
+import ChatQuiz from "@/components/animations/chat-quiz/ChatQuiz";
 
 export interface AnimationEntry {
   id: string;
@@ -60,5 +61,11 @@ export const ANIMATIONS: AnimationEntry[] = [
     name: "Nav Scrubber",
     Demo: ScrubberCallout,
     blurb: "The nav you're dragging right now. Meta, huh?",
+  },
+  {
+    id: "chat-quiz",
+    name: "Chat Quiz",
+    Demo: ChatQuiz,
+    blurb: "An AI composer that interviews you before it helps.",
   },
 ];
