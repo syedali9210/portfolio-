@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ANIMATIONS, type AnimationEntry } from "@/data/animations";
+import { ANIMATIONS, byNewest, isNew, type AnimationEntry } from "@/data/animations";
 
 // Each preview renders the real Demo component, scaled down and inert —
 // same "live, interactive" components the full page uses, just muted here
@@ -25,9 +25,11 @@ function AnimationCard({ entry }: { entry: AnimationEntry }) {
       href={`/animations/${entry.id}`}
       className="group flex flex-col gap-3 rounded-2xl bg-card p-3 shadow-[var(--shadow-3)] transition-transform duration-300 hover:-translate-y-0.5"
     >
-      <span className="w-fit rounded-md bg-secondary px-2 py-1 text-[11px] font-medium text-muted-foreground">
-        New
-      </span>
+      {isNew(entry) && (
+        <span className="w-fit rounded-md bg-secondary px-2 py-1 text-[11px] font-medium text-muted-foreground">
+          New
+        </span>
+      )}
 
       <div className="relative flex h-[180px] w-full items-center justify-center overflow-hidden rounded-xl bg-muted">
         {/* Fixed width so each Demo lays out at the comfortable size it was
@@ -48,9 +50,11 @@ function AnimationCard({ entry }: { entry: AnimationEntry }) {
 }
 
 export default function AnimationsGrid() {
+  const sorted = [...ANIMATIONS].sort(byNewest);
+
   return (
     <div className="mt-14 grid grid-cols-1 gap-4 sm:grid-cols-2">
-      {ANIMATIONS.map((entry) => (
+      {sorted.map((entry) => (
         <AnimationCard key={entry.id} entry={entry} />
       ))}
     </div>
