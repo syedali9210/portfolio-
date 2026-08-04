@@ -11,9 +11,6 @@ import SectionHeading from "@/components/SectionHeading";
 import { spring } from "@/lib/springs";
 import { projects } from "@/data/projects";
 
-const EASE = [0.22, 1, 0.36, 1] as const;
-const LAYOUT_TRANSITION = { duration: 0.45, ease: EASE };
-
 // Desktop-only: a "Coming soon" pill that tracks the cursor while hovering
 // the blurred hero image, instead of a fixed centered overlay.
 function ComingSoonCursorTag() {
@@ -44,11 +41,7 @@ function ComingSoonCursorTag() {
 }
 
 export default function Projects() {
-  // One project is always morphed into the detail view; clicking a
-  // different title morphs that one and rests the previously-active one.
-  // Every title stays lined up and visible regardless of which is active.
-  const [activeSlug, setActiveSlug] = useState<string>(projects[0].slug);
-
+  // All projects are shown expanded, one after another.
   return (
     <section
       id="projects"
@@ -58,106 +51,65 @@ export default function Projects() {
 
       <FadeIn className="mt-6 px-4 sm:px-6">
         <div className="flex flex-col">
-          {projects.map((project) => {
-            const isActive = activeSlug === project.slug;
+          {projects.map((project) => (
+            <div key={project.slug} className="flex flex-col gap-6 border-b border-foreground/10 py-4 last:border-b-0">
+              <p className="w-fit text-xl font-medium text-foreground">{project.title}</p>
 
-            return (
-              <motion.div
-                key={project.slug}
-                layout
-                transition={LAYOUT_TRANSITION}
-                className="border-b border-foreground/10 last:border-b-0"
-              >
-                {isActive ? (
-                  <motion.div layout="position" transition={LAYOUT_TRANSITION} className="flex flex-col gap-6 py-4">
-                    <motion.p layout="position" transition={LAYOUT_TRANSITION} className="w-fit text-xl font-medium text-foreground">
-                      {project.title}
-                    </motion.p>
+              {project.image && (project.caseStudy && !project.comingSoon ? (
+                <Link
+                  href={`/projects/${project.slug}`}
+                  className="group/hero relative aspect-video w-full overflow-hidden rounded-xl bg-transparent transition-opacity hover:opacity-80"
+                >
+                  <Image
+                    src={project.image}
+                    alt={`${project.title} screenshot`}
+                    fill
+                    sizes="(min-width: 640px) 680px, 100vw"
+                    className="object-cover object-top"
+                  />
+                </Link>
+              ) : (
+                <div className="group/hero relative aspect-video w-full overflow-hidden rounded-xl bg-transparent">
+                  <Image
+                    src={project.image}
+                    alt={`${project.title} screenshot`}
+                    fill
+                    sizes="(min-width: 640px) 680px, 100vw"
+                    className={cn(
+                      "object-cover object-top",
+                      project.comingSoon && "object-contain p-8 blur-md"
+                    )}
+                  />
+                  {project.comingSoon && <ComingSoonCursorTag />}
+                </div>
+              ))}
 
-                    <motion.div
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.35, ease: EASE, delay: 0.15 }}
-                      className="flex flex-col gap-6"
-                    >
-                      {project.image && (project.caseStudy && !project.comingSoon ? (
-                        <Link
-                          href={`/projects/${project.slug}`}
-                          className="group/hero relative aspect-video w-full overflow-hidden rounded-xl bg-transparent transition-opacity hover:opacity-80"
-                        >
-                          <Image
-                            src={project.image}
-                            alt={`${project.title} screenshot`}
-                            fill
-                            sizes="(min-width: 640px) 680px, 100vw"
-                            className="object-cover object-top"
-                          />
-                        </Link>
-                      ) : (
-                        <div className="group/hero relative aspect-video w-full overflow-hidden rounded-xl bg-transparent">
-                          <Image
-                            src={project.image}
-                            alt={`${project.title} screenshot`}
-                            fill
-                            sizes="(min-width: 640px) 680px, 100vw"
-                            className={cn(
-                              "object-cover object-top",
-                              project.comingSoon && "object-contain p-8 blur-md"
-                            )}
-                          />
-                          {project.comingSoon && <ComingSoonCursorTag />}
-                        </div>
-                      ))}
+              <div className="flex flex-col gap-2">
+                <p className="text-base font-medium text-foreground">{project.tag}</p>
+                <p className="text-base leading-relaxed text-muted-foreground">{project.description}</p>
+              </div>
 
-                      <div className="flex flex-col gap-2">
-                        <p className="text-base font-medium text-foreground">{project.tag}</p>
-                        <p className="text-base leading-relaxed text-muted-foreground">
-                          {project.description}
-                        </p>
-                      </div>
-
-                      {/* Pulled up out of the parent's gap-6 — sits closer to
-                          the description than the image/text spacing above it. */}
-                      <div className="-mt-3 flex flex-col gap-3">
-                        {project.caseStudy && (
-                          <Link
-                            href={`/projects/${project.slug}`}
-                            className="w-fit rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-80"
-                          >
-                            View Case Study
-                          </Link>
-                        )}
-
-                        {project.comingSoon && (
-                          <span className="flex w-fit items-center gap-1.5 rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background sm:hidden">
-                            <Lock className="size-3.5" />
-                            Coming soon
-                          </span>
-                        )}
-                      </div>
-                    </motion.div>
-                  </motion.div>
-                ) : (
-                  <motion.button
-                    layout="position"
-                    transition={LAYOUT_TRANSITION}
-                    type="button"
-                    onClick={() => setActiveSlug(project.slug)}
-                    className="group flex w-full items-baseline justify-between gap-4 py-4 text-left"
+              {/* Pulled up out of the parent's gap-6 — sits closer to the
+                  description than the image/text spacing above it. */}
+              <div className="-mt-3 flex flex-col gap-3">
+                {project.caseStudy && (
+                  <Link
+                    href={`/projects/${project.slug}`}
+                    className="w-fit rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-80"
                   >
-                    <motion.span
-                      layout="position"
-                      transition={LAYOUT_TRANSITION}
-                      className="text-lg text-foreground transition-[font-weight] group-hover:font-medium"
-                    >
-                      {project.title}
-                    </motion.span>
-                    <span className="shrink-0 text-sm text-muted-foreground">{project.meta}</span>
-                  </motion.button>
+                    View Case Study
+                  </Link>
                 )}
-              </motion.div>
-            );
-          })}
+
+                {project.comingSoon && (
+                  <span className="flex w-fit items-center gap-1.5 rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background sm:hidden">
+                    <Lock className="size-3.5" />
+                    Coming soon
+                  </span>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
       </FadeIn>
     </section>
