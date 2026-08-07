@@ -89,7 +89,7 @@ export default function Hero() {
           <div className="flex w-full flex-col px-4 sm:px-6">
             <div className="screen-line-bottom flex items-center gap-2 py-3">
               <div className="relative size-[47px] shrink-0 overflow-hidden rounded-full bg-card shadow-[inset_0_0_10px_0_#232323]">
-                <Image src="/images/profile-avatar.jpg" alt="Syed Ali" fill className="object-cover" />
+                <Image src="/images/profile-avatar.jpg" alt="Syed Ali" fill sizes="47px" className="object-cover" />
               </div>
               <div className="flex flex-col justify-center self-stretch pr-4">
                 <p className="text-xl font-medium text-foreground">Syed Ali</p>
@@ -167,7 +167,13 @@ export default function Hero() {
             <DockIconRow icons={DOCK_COLUMN_A.icons} />
             <div className="aspect-[8/5] w-full overflow-hidden rounded-lg bg-secondary p-1.5 sm:rounded-xl sm:p-3">
               <div className="relative h-full w-full overflow-hidden rounded-md shadow-[inset_0_0_33px_0_rgba(48,48,48,0.25)] sm:rounded-[14px]">
-                <Image src={DOCK_COLUMN_A.shot} alt="Framer workspace screenshot" fill className="object-cover" />
+                <Image
+                  src={DOCK_COLUMN_A.shot}
+                  alt="Framer workspace screenshot"
+                  fill
+                  sizes="(min-width: 640px) 213px, 30vw"
+                  className="object-cover"
+                />
               </div>
             </div>
           </FadeIn>
@@ -177,7 +183,13 @@ export default function Hero() {
               <Image src="/images/window-controls-active.svg" alt="" width={46} height={10} className="w-6 sm:w-[46px]" />
               <div className="flex gap-1.5 sm:gap-3">
                 <div className="relative aspect-[200/230] w-full overflow-hidden rounded-md shadow-[inset_0_0_33px_0_rgba(48,48,48,0.25)] sm:rounded-xl">
-                  <Image src="/images/dock-shot-80.png" alt="FigJam board screenshot" fill className="object-cover" />
+                  <Image
+                    src="/images/dock-shot-80.png"
+                    alt="FigJam board screenshot"
+                    fill
+                    sizes="(min-width: 640px) 213px, 30vw"
+                    className="object-cover"
+                  />
                 </div>
                 <div className="hidden w-24 shrink-0 flex-col gap-3 sm:flex">
                   <div className="flex min-h-[100px] flex-1 items-center justify-center overflow-hidden rounded-md bg-secondary shadow-[inset_0_0_33px_0_rgba(48,48,48,0.25)]">
@@ -193,14 +205,32 @@ export default function Hero() {
             <DockIconRow icons={DOCK_COLUMN_C.icons} />
             <div className="flex aspect-[8/5] w-full gap-1 overflow-hidden rounded-lg bg-secondary p-1.5 sm:gap-2 sm:rounded-xl sm:p-3">
               <div className="relative h-full w-2/3 overflow-hidden rounded-md shadow-[inset_0_0_33px_0_rgba(48,48,48,0.25)] sm:rounded-lg">
-                <Image src={DOCK_COLUMN_C.shots[0]} alt="Antigravity IDE screenshot" fill className="object-cover" />
+                <Image
+                  src={DOCK_COLUMN_C.shots[0]}
+                  alt="Antigravity IDE screenshot"
+                  fill
+                  sizes="(min-width: 640px) 142px, 20vw"
+                  className="object-cover"
+                />
               </div>
               <div className="flex h-full w-1/3 flex-col gap-1 sm:gap-1.5">
                 <div className="relative flex-1 overflow-hidden rounded shadow-[inset_0_0_33px_0_rgba(48,48,48,0.25)]">
-                  <Image src={DOCK_COLUMN_C.shots[1]} alt="" fill className="object-cover" />
+                  <Image
+                    src={DOCK_COLUMN_C.shots[1]}
+                    alt=""
+                    fill
+                    sizes="(min-width: 640px) 71px, 10vw"
+                    className="object-cover"
+                  />
                 </div>
                 <div className="relative flex-1 overflow-hidden rounded shadow-[inset_0_0_33px_0_rgba(48,48,48,0.25)]">
-                  <Image src={DOCK_COLUMN_C.shots[2]} alt="" fill className="object-cover" />
+                  <Image
+                    src={DOCK_COLUMN_C.shots[2]}
+                    alt=""
+                    fill
+                    sizes="(min-width: 640px) 71px, 10vw"
+                    className="object-cover"
+                  />
                 </div>
               </div>
             </div>

@@ -330,8 +330,36 @@ export default function PetBuddyPathHero({ interactive = false }: { interactive?
   // effect, so the cascading-render lint rule doesn't apply.
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- deliberate post-hydration flip; see above
-    setMounted(true);
+    // Two rAFs deep, not an immediate flip: on a cold hard reload this effect
+    // fires while the rest of the page is still hydrating/decoding images,
+    // so the browser hasn't necessarily painted the pre-entrance (rest)
+    // frame yet. Motion's springs are wall-clock driven — if that hydration
+    // work blocks the main thread right as they start, the first real paint
+    // lands mid-spring instead of at frame 0, and it reads as a jump/stutter
+    // instead of a fall. Two rAFs guarantee at least one real paint has
+    // already happened before the choreography's clock starts ticking.
+    //
+    // A backgrounded/unfocused tab can suspend rAF delivery entirely — the
+    // walkway would then never drop in at all instead of just landing a beat
+    // late, which is worse than the jump this is fixing. A capped timeout
+    // races it: whichever fires first wins, `fired` stops the loser.
+    let fired = false;
+    const flip = () => {
+      if (fired) return;
+      fired = true;
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- deliberate post-paint flip; see above
+      setMounted(true);
+    };
+    let raf2 = 0;
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(flip);
+    });
+    const fallback = window.setTimeout(flip, 200);
+    return () => {
+      cancelAnimationFrame(raf1);
+      if (raf2) cancelAnimationFrame(raf2);
+      clearTimeout(fallback);
+    };
   }, []);
 
   useLayoutEffect(() => {
