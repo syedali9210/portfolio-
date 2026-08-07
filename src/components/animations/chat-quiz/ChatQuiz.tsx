@@ -364,6 +364,7 @@ export default function ChatQuiz() {
   const quizRef = useRef<HTMLDivElement>(null);
   const pillRef = useRef<HTMLDivElement>(null);
   const [viewH, setViewH] = useState(0);
+  const [pulse, setPulse] = useState(0); // bump to fire a shockwave through the lattice
   const timers = useRef<number[]>([]);
   // Guards the scheduled advance() in pick() — see there for why.
   const advancing = useRef(false);
@@ -576,6 +577,7 @@ export default function ChatQuiz() {
    *  wakes up and asks a clarifying question first. Thinking comes after that. */
   function send() {
     if (!canSend) return;
+    setPulse((n) => n + 1); // the send is the loudest event in the composer
     if (chip) setQueue([{ chip, arg: draft.trim() }]);
     setChip(null);
     setDraft("");
@@ -1113,7 +1115,7 @@ export default function ChatQuiz() {
           className="pointer-events-none absolute inset-0 overflow-hidden"
           style={{ borderRadius: R }}
         >
-          <DitherField interactive preset={fieldPreset} />
+          <DitherField interactive preset={fieldPreset} pulse={pulse} />
         </div>
         {/* column fills the card so the toolbar is pinned to the bottom edge
             rather than floating wherever the text happens to end */}

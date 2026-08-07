@@ -1,60 +1,85 @@
 import { useEffect, useRef } from 'react'
 
-/** 8×8 ordered (Bayer) threshold matrix — the classic dither pattern. */
+/*
+ * A spring lattice.
+ *
+ * Same DNA as the dither it replaces — a dot grid, a corner-anchored falloff,
+ * one colour register per state — but every dot is now a body with a rest
+ * position, a velocity and a spring holding it home. Four forces act on it:
+ *
+ *   flow      a slow curl field, so the lattice breathes instead of sitting still
+ *   cursor    a soft shove, or a vortex once you press and hold
+ *   waves     expanding rings fired on state changes and on send
+ *   spring    always pulling it back to rest
+ *
+ * Everything else falls out of that: brightness and radius come from how fast a
+ * dot is moving, so the field lights up exactly where it's disturbed.
+ */
+
+/** 8×8 ordered (Bayer) threshold. Not for tone this time — it decides *which*
+ *  dots are lit near the edge, so the field dissolves instead of ending on a
+ *  visible contour. Same dissolve as the dither it replaces. */
 const BAYER = [
   0, 32, 8, 40, 2, 34, 10, 42, 48, 16, 56, 24, 50, 18, 58, 26, 12, 44, 4, 36, 14, 46, 6, 38, 60,
   28, 52, 20, 62, 30, 54, 22, 3, 35, 11, 43, 1, 33, 9, 41, 51, 19, 59, 27, 49, 17, 57, 25, 15, 47,
   7, 39, 13, 45, 5, 37, 63, 31, 55, 23, 61, 29, 53, 21,
 ]
 
-const CELL = 6 // css px between dots
-const DOT = 1.5 // dot radius
+const CELL = 7 // css px between rest positions
+const DOT = 1.6 // base dot radius
 const TAU = Math.PI * 2
-const LEVELS = 6 // colour buckets — one path fill each, instead of a fill per dot
+const LEVELS = 7 // colour buckets — one path fill each, not a fill per dot
 
-/* swirl micro-interaction */
-const HOVER_DELAY = 620 // ms of hovering before the dots start gathering
-const GATHER_MS = 1150 // swirl duration — extended for as long as the pointer is held
-const FALL_MS = 2000 // burst + fall before the field settles back
-const MAX_P = 1200
-const LOAD_P = 38 // the loader is a sparse ring, not the whole gradient lifted
-const REARM_MS = 900 // cooldown so it can't retrigger instantly
+/* --- lattice physics ------------------------------------------------------
+   Damped harmonic oscillator per dot: `v = (v + a) * DAMP`, `a` including
+   `-offset * K`. A steady force F parks a dot at F/K px from rest, which is how
+   every constant below was sized. DAMP sits under-damped on purpose — that
+   slight ring is what makes a shove propagate like a ripple.               */
+const K = 0.1 // spring constant -> displacement = force / K
+const DAMP = 0.82
+const PUSH_R = 84 // cursor influence radius, css px
+const PUSH_F = 2.2 // ~22px shove at the centre
+const HOLD_DELAY = 340 // ms of stillness before the vortex engages
+const VORTEX_R = 130
+const WAVE_SPEED = 0.72 // px per ms
+const WAVE_W = 30 // ring thickness
+const WAVE_F = 7
+const WAVE_LIFE = 1100
 
 /**
- * One entry per `variant` — each thinking step gets its own motion and palette.
- * Orbit radius goes as tan²/pull and orbit speed as tan, so both drop together
- * to slow the swirl down without collapsing it into a dot.
+ * One entry per `variant` — each thinking step keeps its own palette so the
+ * marker rail and its label stay in sync with the field.
  */
 const SWIRLS = [
-  { tan: 0.06, pull: 0.029, dir: 1, deep: [88, 140, 214], bright: [156, 200, 255] }, // blue
-  { tan: 0.05, pull: 0.022, dir: -1, deep: [140, 112, 220], bright: [201, 182, 255] }, // violet
-  { tan: 0.075, pull: 0.04, dir: 1, deep: [64, 178, 172], bright: [148, 234, 224] }, // teal
+  { deep: [88, 140, 214], bright: [156, 200, 255] }, // blue
+  { deep: [140, 112, 220], bright: [201, 182, 255] }, // violet
+  { deep: [64, 178, 172], bright: [148, 234, 224] }, // teal
 ]
 /** Text tint that matches each variant, for whatever is labelling the swirl. */
 export const SWIRL_TINTS = SWIRLS.map((s) => `rgb(${s.bright.join(',')})`)
 
 /**
- * Named field presets. Every mode, command and app gets its own register —
- * colour plus how tight, how agitated and how fast the field runs — and the
- * component eases between whichever two are current.
+ * Named field presets. Every mode, command and app gets its own register:
+ * colour, how far the lattice reaches, how hard it breathes and how fast the
+ * flow runs. The component eases between whichever two are current.
  */
 export const PRESETS = {
-  calm: { deep: [88, 140, 214], bright: [156, 200, 255], tight: 1, swell: 0, speed: 0 },
+  calm: { deep: [88, 140, 214], bright: [156, 200, 255], tight: 1, flow: 0.3, speed: 0.55 },
   // toolbar modes
-  build: { deep: [64, 178, 172], bright: [148, 234, 224], tight: 0.94, swell: 0.06, speed: 0.002 },
-  plan: { deep: [126, 116, 214], bright: [198, 190, 255], tight: 1.06, swell: 0.03, speed: 0.001 },
-  execute: { deep: [214, 118, 58], bright: [255, 196, 148], tight: 0.86, swell: 0.16, speed: 0.006 },
+  build: { deep: [64, 178, 172], bright: [148, 234, 224], tight: 0.94, flow: 0.45, speed: 0.8 },
+  plan: { deep: [126, 116, 214], bright: [198, 190, 255], tight: 1.06, flow: 0.24, speed: 0.4 },
+  execute: { deep: [214, 118, 58], bright: [255, 196, 148], tight: 0.86, flow: 0.95, speed: 1.5 },
   // transient states
-  command: { deep: [84, 94, 110], bright: [226, 232, 240], tight: 0.84, swell: 0.16, speed: 0.006 },
-  voice: { deep: [206, 72, 128], bright: [255, 178, 210], tight: 0.9, swell: 0.22, speed: 0.009 },
+  command: { deep: [84, 94, 110], bright: [226, 232, 240], tight: 0.84, flow: 0.8, speed: 1.3 },
+  voice: { deep: [206, 72, 128], bright: [255, 178, 210], tight: 0.9, flow: 1.15, speed: 1.8 },
   // app registers, picked up while a command is highlighted or armed
-  slack: { deep: [178, 40, 88], bright: [255, 150, 190], tight: 0.9, swell: 0.12, speed: 0.004 },
-  clickup: { deep: [96, 84, 200], bright: [186, 176, 255], tight: 0.92, swell: 0.1, speed: 0.004 },
-  cloudflare: { deep: [200, 122, 40], bright: [255, 202, 130], tight: 0.9, swell: 0.14, speed: 0.005 },
+  slack: { deep: [178, 40, 88], bright: [255, 150, 190], tight: 0.9, flow: 0.66, speed: 1.1 },
+  clickup: { deep: [96, 84, 200], bright: [186, 176, 255], tight: 0.92, flow: 0.55, speed: 1 },
+  cloudflare: { deep: [200, 122, 40], bright: [255, 202, 130], tight: 0.9, flow: 0.72, speed: 1.2 },
 } as const
 export type Preset = keyof typeof PRESETS
 
-/** Build the six colour buckets for a deep→bright pair. */
+/** Six colour buckets for a deep→bright pair. */
 const ramp = (
   deep: readonly number[],
   bright: readonly number[],
@@ -63,10 +88,9 @@ const ramp = (
   for (let l = 0; l < LEVELS; l++) {
     const k = (l + 0.5) / LEVELS
     const c = (i: number) => Math.round(deep[i] + (bright[i] - deep[i]) * k)
-    const a = 0.38 + 0.62 * k
+    const a = 0.34 + 0.66 * k
     out[l] = `rgba(${c(0)},${c(1)},${c(2)},${a.toFixed(3)})`
   }
-  return out
 }
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t
 const lerp3 = (a: readonly number[], b: readonly number[], t: number) => [
@@ -75,36 +99,27 @@ const lerp3 = (a: readonly number[], b: readonly number[], t: number) => [
   lerp(a[2], b[2], t),
 ]
 
-/** `sp`/`dg` vary per dot — without them every particle settles on the same
- *  orbit and the vortex renders as one clean ring instead of a spiral. */
-type Particle = { x: number; y: number; vx: number; vy: number; k: number; sp: number; dg: number }
-type Phase = 'idle' | 'gather' | 'loading' | 'fall'
+type Wave = { x: number; y: number; born: number }
 
 /**
- * Blue dot-dither gradient bleeding from the bottom-right corner of whichever
- * card it sits in — it fills its parent, so the parent's `overflow-hidden`
- * clips it to the rounded corners. Hovering adds a soft blob of intensity.
- *
- * With `interactive`, hovering still (or pressing and holding) for a beat lifts
- * every lit dot out of the gradient: they spiral into the cursor, burst, and
- * fall away under gravity before the gradient fades back in.
- *
- * `loading` runs the same lift, but the dots orbit a fixed point on the right
- * and keep going — a spinner made of the gradient itself. Bumping `variant`
- * mid-flight reshuffles them into a different swirl and palette.
- * `spread` scales how far the gradient reaches in from the corner.
+ * Dot lattice that lives in whichever card it sits in. Hovering pushes the dots
+ * aside; pressing and holding pulls them into a vortex; releasing fires a
+ * shockwave and they spring home. `preset` sets the register, `pulse` fires a
+ * wave from the bottom-right on demand, `spread` scales the corner reach.
  */
 export default function DitherField({
   interactive = false,
   loading = false,
   preset = 'calm',
   variant = 0,
-  spread = 0.55,
+  pulse = 0,
+  spread = 1.12,
 }: {
   interactive?: boolean
   loading?: boolean
   preset?: Preset
   variant?: number
+  pulse?: number
   spread?: number
 }) {
   const ref = useRef<HTMLCanvasElement>(null)
@@ -112,13 +127,15 @@ export default function DitherField({
   const loadingRef = useRef(loading)
   const variantRef = useRef(variant)
   const presetRef = useRef<Preset>(preset)
+  const pulseRef = useRef(pulse)
   // Kept out of the rAF-loop effect's deps below (only `interactive`/`spread`
   // restart it) — the loop reads these refs each frame instead.
   useEffect(() => {
     loadingRef.current = loading
     variantRef.current = variant % SWIRLS.length
     presetRef.current = preset
-  }, [loading, variant, preset])
+    pulseRef.current = pulse
+  }, [loading, variant, preset, pulse])
 
   useEffect(() => {
     const canvas = ref.current!
@@ -133,37 +150,37 @@ export default function DitherField({
 
     let w = 0
     let h = 0
-    let cw = 0
-    let ch = 0
+    let cols = 0
+    let rows = 0
     let raf = 0
     let t = 0
 
-    // xy pairs per colour bucket, reused every frame
+    // flat arrays beat objects here — this loop touches every dot every frame
+    let x0 = new Float32Array(0)
+    let y0 = new Float32Array(0)
+    let ox = new Float32Array(0)
+    let oy = new Float32Array(0)
+    let vx = new Float32Array(0)
+    let vy = new Float32Array(0)
+    let rest = new Float32Array(0) // baked corner falloff, 0..1
+
     let bucket: Float32Array[] = []
     const count = new Uint16Array(LEVELS)
+    const shades: string[] = new Array(LEVELS)
 
-    // pointer target + eased actual position, in cell space
-    const p = { x: -1e3, y: -1e3, tx: -1e3, ty: -1e3, glow: 0, want: 0 }
-
-    let phase: Phase = 'idle'
-    let phaseAt = 0
-    let settledAt = 0 // last time the pointer stopped moving
-    let endedAt = -1e9 // last time a burst finished
-    let shownVariant = 0
+    // eased pointer, in css px
+    const p = { x: -1e3, y: -1e3, tx: -1e3, ty: -1e3, on: 0, want: 0 }
     let held = false
-    let collect = false // sample the lit cells into particles on the next field pass
-    let fieldK = 1 // gradient opacity, ducks out while the particles are flying
+    let settledAt = 0
+    let vortex = 0 // 0..1 eased engagement of the hold vortex
+
+    const waves: Wave[] = []
+    let seenPulse = pulse
+
     // eased crossfade between the outgoing and incoming preset
     let fromP: Preset = preset
     let toP: Preset = preset
     let blend = 1
-    const shades: string[] = new Array(LEVELS)
-    let pAlpha = 0 // particles fade as one — they all ramp and decay together
-    let parts: Particle[] = []
-
-    /** Where the loading swirl orbits: inside the right edge and above centre,
-     *  since the pill's lower half sits behind the chat box. */
-    const orbit = () => ({ x: cw - 6, y: ch * 0.37 })
 
     function resize() {
       const nw = host.clientWidth
@@ -171,266 +188,212 @@ export default function DitherField({
       if (nw === w && nh === h) return
       w = nw
       h = nh
-      cw = Math.max(1, Math.ceil(w / CELL))
-      ch = Math.max(1, Math.ceil(h / CELL))
+      cols = Math.max(1, Math.ceil(w / CELL))
+      rows = Math.max(1, Math.ceil(h / CELL))
+      const n = cols * rows
+      x0 = new Float32Array(n)
+      y0 = new Float32Array(n)
+      ox = new Float32Array(n)
+      oy = new Float32Array(n)
+      vx = new Float32Array(n)
+      vy = new Float32Array(n)
+      rest = new Float32Array(n)
+      for (let r = 0, i = 0; r < rows; r++)
+        for (let c = 0; c < cols; c++, i++) {
+          x0[i] = c * CELL + CELL / 2
+          y0[i] = r * CELL + CELL / 2
+        }
       canvas.width = Math.round(w * dpr)
       canvas.height = Math.round(h * dpr)
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-      bucket = Array.from({ length: LEVELS }, () => new Float32Array(cw * ch * 2))
+      bucket = Array.from({ length: LEVELS }, () => new Float32Array(n * 3))
     }
 
-    /** the field is background texture — it shouldn't chase the cursor while the
-     *  cursor is busy with a control sitting on top of it */
+    /** the field is background texture — it shouldn't react to the cursor while
+     *  the cursor is busy with a control sitting on top of it */
     const overControl = (t: EventTarget | null) =>
       t instanceof Element &&
       !!t.closest('button, a, input, textarea, select, [role="button"]')
 
     function onMove(e: PointerEvent) {
       const r = surface.getBoundingClientRect()
-      p.tx = (e.clientX - r.left) / CELL
-      p.ty = (e.clientY - r.top) / CELL
+      p.tx = e.clientX - r.left
+      p.ty = e.clientY - r.top
       p.want = overControl(e.target) ? 0 : 1
-      settledAt = performance.now() // the delay counts from when you stop moving
+      settledAt = performance.now()
     }
     function onLeave() {
       p.want = 0
       held = false
-      if (phase === 'gather') burst()
     }
     function onDown(e: PointerEvent) {
-      if (overControl(e.target)) return // pressing a button isn't a swirl gesture
+      if (overControl(e.target)) return // pressing a button isn't a lattice gesture
       held = true
     }
     function onUp() {
+      if (held && vortex > 0.2) waves.push({ x: p.x, y: p.y, born: performance.now() })
       held = false
     }
 
-    function burst() {
-      // read the swirl origin before the phase flips, or it always reads as the cursor
-      const o = phase === 'loading' ? orbit() : p
-      phase = 'fall'
-      phaseAt = performance.now()
-      for (const q of parts) {
-        const ang = Math.atan2(q.y - o.y, q.x - o.x) + (Math.random() - 0.5) * 0.9
-        const sp = 0.35 + Math.random() * 0.9
-        q.vx = Math.cos(ang) * sp
-        q.vy = Math.sin(ang) * sp - 1.0 // pop up before gravity takes over
-      }
-    }
-
-    /** hover-delay / hold -> swirl -> burst -> fall -> idle */
-    function step(now: number) {
-      if (phase === 'idle') {
-        const ready = now - endedAt > REARM_MS && p.glow > 0.5 && p.want === 1
-        if (ready && (held || now - settledAt > HOVER_DELAY)) {
-          phase = 'gather'
-          phaseAt = now
-          collect = true
-          pAlpha = 0
-        }
-        return
-      }
-      if (phase === 'gather') {
-        // holding keeps them spinning; releasing (or the timer) sets them off
-        if (!held && now - phaseAt > GATHER_MS) burst()
-        return
-      }
-      if (now - phaseAt > FALL_MS || parts.length === 0) {
-        phase = 'idle'
-        parts = []
-        endedAt = now
-        settledAt = now
-      }
-    }
-
-    function stepParticles() {
-      const load = phase === 'loading'
-      const swirl = load || phase === 'gather'
-      const cfg = SWIRLS[shownVariant]
-      // the loading spinner orbits a fixed point over on the right, not the cursor
-      const o = load ? orbit() : p
-      pAlpha = swirl ? Math.min(1, pAlpha + 0.05) : Math.max(0, pAlpha - 0.006)
-      const next: Particle[] = []
-      for (const q of parts) {
-        if (swirl) {
-          const dx = q.x - o.x
-          const dy = q.y - o.y
-          const d = Math.hypot(dx, dy) || 0.001
-          const nx = dx / d
-          const ny = dy / d
-          const pull = d < 2 ? 0.04 : load ? cfg.pull * (1 + d * 0.02) : 0.3 + d * 0.005
-          q.vx -= nx * pull
-          q.vy -= ny * pull
-          const tan = (q.sp * (load ? cfg.tan : 0.46)) / (1 + d * 0.05) // inner dots orbit faster
-          const dir = load ? cfg.dir : 1
-          q.vx += -ny * tan * dir
-          q.vy += nx * tan * dir
-          const jit = load ? 0.012 : 0.03
-          q.vx = q.vx * q.dg + (Math.random() - 0.5) * jit
-          q.vy = q.vy * q.dg + (Math.random() - 0.5) * jit
-          q.k = Math.min(0.999, q.k + 0.02) // brighten as they compress (<1 keeps the bucket index in range)
-        } else {
-          q.vy += 0.06 // gravity
-          q.vx *= 0.985
-          q.vy *= 0.995
-        }
-        q.x += q.vx
-        q.y += q.vy
-        // only the falling dots die off the bottom — a swirl pulls stragglers back in,
-        // which matters while the card is still collapsing under them
-        if (swirl || q.y < ch + 4) next.push(q)
-      }
-      parts = pAlpha > 0 ? next : []
-    }
-
-    function frame() {
+    function frame(now: number) {
       raf = requestAnimationFrame(frame)
-      if (!cw) return
-      const now = performance.now()
-      // presets crossfade: colour, tightness, agitation and drift all travel together
+      if (!cols) return
+
+      /* --- preset crossfade ------------------------------------------------ */
       if (presetRef.current !== toP) {
         fromP = blend >= 1 ? toP : fromP
         toP = presetRef.current
         blend = 0
+        // a register change is a state change — announce it with a wave
+        if (!reduced) waves.push({ x: w, y: h, born: now })
       }
       blend = Math.min(1, blend + 0.05)
       const A = PRESETS[fromP]
       const B = PRESETS[toP]
       const tight = lerp(A.tight, B.tight, blend)
-      const swell = lerp(A.swell, B.swell, blend)
-      const speed = lerp(A.speed, B.speed, blend)
-      if (!reduced) t += 0.005 + speed
+      const flowAmt = reduced ? 0 : lerp(A.flow, B.flow, blend)
+      const flowSpd = lerp(A.speed, B.speed, blend)
+      if (!reduced) t += 0.004 * flowSpd
 
-      // ease the pointer so the blob trails the cursor instead of snapping
+      if (pulseRef.current !== seenPulse) {
+        seenPulse = pulseRef.current
+        if (!reduced) waves.push({ x: w, y: h * 0.5, born: now })
+      }
+      while (waves.length > 4) waves.shift()
+
+      /* --- pointer --------------------------------------------------------- */
       if (p.x < -1e2) {
         p.x = p.tx
         p.y = p.ty
       }
-      p.x += (p.tx - p.x) * 0.12
-      p.y += (p.ty - p.y) * 0.12
-      p.glow += (p.want - p.glow) * 0.07
+      p.x += (p.tx - p.x) * 0.16
+      p.y += (p.ty - p.y) * 0.16
+      p.on += (p.want - p.on) * 0.09
+      const wantVortex =
+        interactive && !reduced && held && p.want === 1 && now - settledAt > HOLD_DELAY
+      vortex += ((wantVortex ? 1 : 0) - vortex) * 0.07
 
-      const wantLoad = loadingRef.current && !reduced
-      if (wantLoad && phase !== 'loading') {
-        phase = 'loading'
-        phaseAt = now
-        parts = []
-        collect = true
-        pAlpha = 0
-      } else if (!wantLoad && phase === 'loading') {
-        burst()
-      } else if (interactive && !reduced) {
-        step(now)
-      }
+      /* --- falloff geometry ------------------------------------------------ */
+      const ar = w / h
+      const norm = Math.hypot(ar, 1) * spread * tight
 
-      // a new thinking step: kick the dots loose so they visibly re-form
-      if (phase === 'loading' && variantRef.current !== shownVariant) {
-        shownVariant = variantRef.current
-        for (const q of parts) {
-          const a = Math.random() * TAU
-          const s = 0.15 + Math.random() * 0.3
-          q.vx += Math.cos(a) * s
-          q.vy += Math.sin(a) * s
-          q.sp = 0.5 + Math.random()
-        }
-      } else if (phase !== 'loading') {
-        shownVariant = 0
-      }
-
-      // gradient ducks out while the dots are flying, fades back once they land
-      const wantField = phase === 'idle' || (phase === 'fall' && now - phaseAt > 900) ? 1 : 0
-      fieldK += (wantField - fieldK) * 0.05
-
-      const ar = cw / ch
-      const norm = Math.hypot(ar, 1)
-      const px = (p.x / cw - 1) * ar
-      const py = p.y / ch - 1
       count.fill(0)
+      // reduced motion keeps the field's colour and shape, drops every displacement
+      const push = reduced ? 0 : PUSH_F * p.on
+      const pr2 = PUSH_R * PUSH_R
 
-      for (let y = 0; y < ch; y++) {
-        const ny = y / ch - 1
-        for (let x = 0; x < cw; x++) {
-          const nx = (x / cw - 1) * ar
+      for (let i = 0, n = cols * rows; i < n; i++) {
+        const rx = x0[i]
+        const ry = y0[i]
+        const col = i % cols
+        const row = (i / cols) | 0
 
-          // radial falloff from the bottom-right corner of the card
-          let v = 1 - Math.hypot(nx, ny) / (norm * spread * tight)
-          v = v > 0 ? v * v * v * 1.05 : 0
-          // slow diagonal swell — multiplied in, so it never speckles the dead zone
-          v *= 1 + (0.22 + swell) * Math.sin(nx * 6 + t * 1.6) * Math.sin(ny * 4 - t)
-          // cursor blob
-          const pd = Math.hypot(nx - px, ny - py)
-          v += 0.4 * p.glow * Math.exp(-(pd * pd) / 0.05)
-          v *= fieldK
+        // Falloff still anchored bottom-right, but the reach now clears the far
+        // corner so the lattice spans the whole card. A gentler exponent than the
+        // old cubic keeps the far side populated instead of cutting it dead.
+        const nx = (rx / w - 1) * ar
+        const ny = ry / h - 1
+        let k = 1 - Math.hypot(nx, ny) / norm
+        k = k > 0 ? k * k * Math.sqrt(k) : 0
+        rest[i] = k
 
-          if (v > (BAYER[(y & 7) * 8 + (x & 7)] + 0.5) / 64) {
-            const k = Math.min(0.999, v)
-            if (collect)
-              parts.push({
-                x,
-                y,
-                vx: 0,
-                vy: 0,
-                k,
-                sp: 0.5 + Math.random(),
-                dg: 0.79 + Math.random() * 0.09,
-              })
-            const l = (k * LEVELS) | 0
-            const n = count[l]++ * 2
-            bucket[l][n] = x * CELL + CELL / 2
-            bucket[l][n + 1] = y * CELL + CELL / 2
+        let ax = 0
+        let ay = 0
+
+        if (k > 0.004) {
+          // curl-ish flow from layered sines: organic drift without a noise table
+          if (flowAmt > 0) {
+            const a = Math.sin(nx * 3.1 + t) + Math.cos(ny * 2.7 - t * 0.8)
+            const b = Math.sin((nx + ny) * 2.2 + t * 0.6)
+            ax += Math.cos((a + b) * 1.7) * flowAmt
+            ay += Math.sin((a - b) * 1.7) * flowAmt
+          }
+
+          // cursor: shove aside, or orbit once the vortex is engaged
+          const dx = rx + ox[i] - p.x
+          const dy = ry + oy[i] - p.y
+          const d2 = dx * dx + dy * dy
+          if (d2 < pr2 || (vortex > 0.01 && d2 < VORTEX_R * VORTEX_R)) {
+            const d = Math.sqrt(d2) || 0.001
+            const ux = dx / d
+            const uy = dy / d
+            if (d2 < pr2) {
+              const f = (1 - d / PUSH_R) ** 2 * push
+              ax += ux * f
+              ay += uy * f
+            }
+            if (vortex > 0.01) {
+              const g = (1 - Math.min(1, d / VORTEX_R)) ** 2 * vortex
+              ax += (-uy * 2.4 - ux * 0.9) * g // tangential + a little inward
+              ay += (ux * 2.4 - uy * 0.9) * g
+            }
+          }
+
+          // shockwaves
+          for (let wi = 0; wi < waves.length; wi++) {
+            const wv = waves[wi]
+            const age = now - wv.born
+            if (age > WAVE_LIFE) continue
+            const wdx = rx - wv.x
+            const wdy = ry - wv.y
+            const wd = Math.hypot(wdx, wdy) || 0.001
+            const band = (wd - age * WAVE_SPEED) / WAVE_W
+            if (band > -3 && band < 3) {
+              const f = Math.exp(-band * band) * WAVE_F * (1 - age / WAVE_LIFE)
+              ax += (wdx / wd) * f
+              ay += (wdy / wd) * f
+            }
           }
         }
+
+        // spring home
+        ax -= ox[i] * K
+        ay -= oy[i] * K
+        vx[i] = (vx[i] + ax) * DAMP
+        vy[i] = (vy[i] + ay) * DAMP
+        ox[i] += vx[i]
+        oy[i] += vy[i]
+
+        if (k <= 0.002) continue
+
+        // brightness tracks disturbance: the lattice lights up where it's touched
+        const sp = Math.min(1, Math.hypot(vx[i], vy[i]) * 0.34)
+        const lit = Math.min(0.999, k * 0.9 + sp * 0.75)
+        // ordered threshold: dots wink out stochastically toward the edge
+        if (lit < (BAYER[(row & 7) * 8 + (col & 7)] + 0.5) / 64) continue
+        const l = (lit * LEVELS) | 0
+        const b = bucket[l]
+        const m = count[l]++ * 3
+        b[m] = rx + ox[i]
+        b[m + 1] = ry + oy[i]
+        b[m + 2] = DOT * (0.55 + 0.85 * lit)
       }
 
-      if (collect) {
-        collect = false
-        // keep the cost bounded on big cards; the loader keeps far fewer than that
-        const cap = phase === 'loading' ? LOAD_P : MAX_P
-        if (parts.length > cap) parts = parts.filter(() => Math.random() < cap / parts.length)
-      }
-
-      if (parts.length) {
-        stepParticles()
-        for (const q of parts) {
-          const l = (q.k * LEVELS) | 0
-          const n = count[l]++ * 2
-          if (n + 1 >= bucket[l].length) continue
-          bucket[l][n] = q.x * CELL + CELL / 2
-          bucket[l][n + 1] = q.y * CELL + CELL / 2
-        }
-      }
+      /* --- draw ------------------------------------------------------------ */
+      ramp(lerp3(A.deep, B.deep, blend), lerp3(A.bright, B.bright, blend), shades)
 
       ctx.clearRect(0, 0, w, h)
-      // the loading swirl keeps its own per-step palette; everything else rides the preset
-      if (phase === 'loading') {
-        const s = SWIRLS[shownVariant]
-        ramp(s.deep, s.bright, shades)
-      } else {
-        ramp(lerp3(A.deep, B.deep, blend), lerp3(A.bright, B.bright, blend), shades)
-      }
-      const dotAlpha = phase === 'idle' ? 1 : Math.max(fieldK, pAlpha)
       for (let l = 0; l < LEVELS; l++) {
         const n = count[l]
         if (!n) continue
-        const pts = bucket[l]
+        const b = bucket[l]
         ctx.beginPath()
         for (let i = 0; i < n; i++) {
-          const x = pts[i * 2]
-          const y = pts[i * 2 + 1]
-          ctx.moveTo(x + DOT, y)
-          ctx.arc(x, y, DOT, 0, TAU)
+          const x = b[i * 3]
+          const y = b[i * 3 + 1]
+          const r = b[i * 3 + 2]
+          ctx.moveTo(x + r, y)
+          ctx.arc(x, y, r, 0, TAU)
         }
-        ctx.globalAlpha = dotAlpha
         ctx.fillStyle = shades[l]
         ctx.fill()
       }
-      ctx.globalAlpha = 1
     }
 
     const ro = new ResizeObserver(resize)
     ro.observe(host)
     resize()
-    frame()
+    raf = requestAnimationFrame(frame)
     surface.addEventListener('pointermove', onMove)
     surface.addEventListener('pointerleave', onLeave)
     if (interactive) {
@@ -445,8 +408,8 @@ export default function DitherField({
       surface.removeEventListener('pointerdown', onDown)
       window.removeEventListener('pointerup', onUp)
     }
-    // `loading`/`variant`/`preset` are deliberately excluded — they're read
-    // each frame via their refs so changing them doesn't tear down and
+    // `loading`/`variant`/`preset`/`pulse` are deliberately excluded — they're
+    // read each frame via their refs so changing them doesn't tear down and
     // reinitialize the canvas/rAF loop. Only `interactive`/`spread` should.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [interactive, spread])
